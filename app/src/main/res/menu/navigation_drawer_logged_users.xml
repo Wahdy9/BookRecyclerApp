@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="Account">
+        <menu>
+            <item
+                android:id="@+id/nav_log_profile"
+                android:title="Profile"
+                android:icon="@drawable/ic_account"/>
+            <item
+                android:id="@+id/nav_log_posts"
+                android:title="Posts"
+                android:icon="@drawable/ic_items"/>
+            <item
+                android:id="@+id/nav_log_favorite"
+                android:title="Favorite"
+                android:icon="@drawable/ic_favorite"/>
+            <item
+                android:id="@+id/nav_log_chats"
+                android:title="Chats"
+                android:icon="@drawable/ic_message" />
+            <item
+                android:id="@+id/nav_log_logout"
+                android:title="Logout"
+                android:icon="@drawable/ic_logout"/>
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/nav_contact"
+        android:title="Contact" />
+    <item
+        android:id="@+id/nav_faq"
+        android:title="FAQ" />
+
+
+
+</menu>

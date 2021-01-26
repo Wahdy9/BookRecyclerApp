@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "118043791300",
+    "project_id": "book-recycler-project",
+    "storage_bucket": "book-recycler-project.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:118043791300:android:4c03c3aea731c8d97b9e91",
+        "android_client_info": {
+          "package_name": "com.example.bookrecycler"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "118043791300-q8fq7d3fds2979ea4k3qe38jvt61oufc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAip3FAAOnEFEvxS71vAC6IgFIy-IXSoj0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "118043791300-q8fq7d3fds2979ea4k3qe38jvt61oufc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
