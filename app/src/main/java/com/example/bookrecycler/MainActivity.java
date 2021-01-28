@@ -6,9 +6,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,12 +21,17 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -30,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
     //views
     private FloatingActionButton Add_item_fab;
+    private ProgressDialog pd;
 
     //drawer views
     private DrawerLayout drawerLayout;
@@ -40,12 +50,17 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseFirestore firestore;
 
+    //RecyclerView
+    private RecyclerView itemRV;
+    private ItemAdapter itemAdapter;
+
+    ArrayList<ItemModel> itemList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        System.out.println("Hello");
         //toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -124,16 +139,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //initialize & populate RV
+        initializeRV();
+        populateRV();
     }
 
 
 
 
-    //load the drawerlayout based on user if he logged or guest
+    //load the drawer Layout based on user if he logged or guest
     private void changesDrawerLayout() {
         //check if user logged, if so load the logged drawer layout
         if(mAuth.getCurrentUser() != null){
-            //this (f) to prevent duplicate nav header
+            //this (if) to prevent duplicate nav header
             if(navigationView.getHeaderCount() == 0) {
                 navigationView.addHeaderView(headerView);
                 //get user info and assign it to header views
@@ -164,6 +182,50 @@ public class MainActivity extends AppCompatActivity {
             navigationView.getMenu().clear();
             navigationView.inflateMenu(R.menu.navigation_drawer_guest_users);
         }
+    }
+
+    //init recyclerView
+    private void initializeRV() {
+        itemList = new ArrayList<>();
+        itemRV = findViewById(R.id.main_items_rv);
+        itemRV.setHasFixedSize(true);
+        itemAdapter = new ItemAdapter(itemList);
+        itemRV.setAdapter(itemAdapter);
+    }
+
+    //get data from firestore and populate the recyclerView
+    private void populateRV() {
+        itemList.clear();//to avoid repetition
+
+        //show progress dialog
+        pd = new ProgressDialog(this);
+        pd.setMessage("Loading");
+        pd.show();
+
+
+        //get all posts from firestore, add them to recyclerview.
+        firestore.collection("Items").orderBy("timePosted", Query.Direction.DESCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+
+                if (queryDocumentSnapshots != null) {
+                    //get all items, add them to itemList
+                    for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                        ItemModel item = doc.toObject(ItemModel.class);
+                        itemList.add(item);
+                    }
+                    //notify adapter
+                    itemAdapter.notifyDataSetChanged();
+                    //itemAdapter = new ItemAdapter(itemList);
+                    //itemRV.setAdapter(itemAdapter);
+
+                    pd.dismiss();
+                }
+
+            }
+        });
+
+
     }
 
 
