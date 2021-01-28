@@ -7,4 +7,21 @@
 
 
 
+
+    <string-array name="spinner_category_types">
+        <item>Computer</item>
+        <item>Art</item>
+        <item>Medicine</item>
+        <item>Business</item>
+        <item>Engineering</item>
+        <item>General</item>
+    </string-array>
+
+    <string-array name="spinner_condition_types">
+        <item>New</item>
+        <item>Used</item>
+        <item>Very used</item>
+        <item>Old</item>
+    </string-array>
+
 </resources>

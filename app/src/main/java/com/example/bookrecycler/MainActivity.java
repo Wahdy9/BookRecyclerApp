@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -27,6 +28,9 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity {
 
+    //views
+    private FloatingActionButton Add_item_fab;
+
     //drawer views
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
@@ -34,17 +38,21 @@ public class MainActivity extends AppCompatActivity {
 
     //firebase
     private FirebaseAuth mAuth;
-    FirebaseFirestore firestore;
+    private FirebaseFirestore firestore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        System.out.println("Hello");
         //toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Book Recycler");
+
+        //init views
+        Add_item_fab = findViewById(R.id.Add_item_fab);
 
         //initialize firebase
         mAuth = FirebaseAuth.getInstance();
@@ -103,6 +111,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //Open AddItemActivity when clicking floating add btn
+        Add_item_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //check if user logged
+                if(mAuth.getCurrentUser() != null) {
+                    startActivity(new Intent(MainActivity.this, AddItemActivity.class));
+                }else{
+                    startActivity(new Intent(MainActivity.this, LoginAndRegisterActivity.class));
+                }
+            }
+        });
+
     }
 
 
@@ -146,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    //this method for when click back btn it will close the drawer not activity
+    //this method for when click back btn it will close the drawer if open not the activity
     @Override
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
