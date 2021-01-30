@@ -29,7 +29,9 @@ import javax.annotation.Nullable;
 
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
 
+    //list to populate
     private ArrayList<ItemModel> itemList;
+    //firebase
     private FirebaseFirestore firestore;
     private FirebaseAuth mAuth;
 
@@ -96,14 +98,16 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
         holder.categoryTV.setText(itemList.get(position).category);
 
         //if item belong to current user, show more btn, so user can edit or delete item
-        if(mAuth.getCurrentUser().getUid().equals(itemList.get(position).getUserId())){
-            holder.moreIV.setVisibility(View.VISIBLE);
-            holder.moreIV.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+        if(mAuth.getCurrentUser() != null) {
+            if (mAuth.getCurrentUser().getUid().equals(itemList.get(position).getUserId())) {
+                holder.moreIV.setVisibility(View.VISIBLE);
+                holder.moreIV.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
 
-                }
-            });
+                    }
+                });
+            }
         }
 
 
@@ -129,9 +133,14 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
         return itemList.size();
     }
 
+    //this method used in filtering, used in MainActivity
+    public void filterList(ArrayList<ItemModel> filteredList) {
+        itemList = filteredList;
+        notifyDataSetChanged();
+    }
 
 
-
+    //view holder
     class ViewHolder extends RecyclerView.ViewHolder {
 
         View itemView;
