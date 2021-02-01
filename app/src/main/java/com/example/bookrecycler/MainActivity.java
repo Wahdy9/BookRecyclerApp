@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     ///////////////////////////////////items of logged user layout////////////////////////////////////
                     case R.id.nav_log_profile:
-                        Toast.makeText(MainActivity.this, "Profile", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(MainActivity.this, MyProfileActivity.class));
                         break;
                     case R.id.nav_log_posts:
                         Toast.makeText(MainActivity.this, "Items", Toast.LENGTH_SHORT).show();

@@ -31,15 +31,19 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
 
     //list to populate
     private ArrayList<ItemModel> itemList;
+
     //firebase
     private FirebaseFirestore firestore;
     private FirebaseAuth mAuth;
 
     private Context mContext;
 
+    private ArrayList<String> usernames;//store usernames, to pass it to details activity, since item dont have the username, it have only userId
+
 
     public ItemAdapter(ArrayList<ItemModel> itemList) {
         this.itemList = itemList;
+        this.usernames = new ArrayList<>();
         firestore = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
     }
@@ -53,7 +57,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
 
         //set title
         holder.titleTV.setText(itemList.get(position).title);
@@ -63,7 +67,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if (documentSnapshot.exists()) {
-                    //username = documentSnapshot.getString("name");
+                    usernames.add(documentSnapshot.getString("name")) ;
                     holder.usernameTV.setText(documentSnapshot.getString("name"));
                 }
             }
@@ -79,7 +83,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
         holder.timeTV.setText(ago);
 
         //get comment counts
-        firestore.collection("Posts").document(itemList.get(position).getItemId()).collection("Comments").addSnapshotListener(new EventListener<QuerySnapshot>() {
+        firestore.collection("Items").document(itemList.get(position).getItemId()).collection("Comments").addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
                 if (!queryDocumentSnapshots.isEmpty()) {
@@ -104,7 +108,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
                 holder.moreIV.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
+                        //show dialog with two options, edit and delete
                     }
                 });
             }
@@ -116,13 +120,12 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
             @Override
             public void onClick(View v) {
 
-                //go to itemDetailsActivity
-
-                /*Intent intent = new Intent(v.getContext(), ItemDetailsActivity.class);
+                //go to itemDetailActivity
+                Intent intent = new Intent(v.getContext(), ItemDetailsActivity.class);
                 intent.putExtra("item", itemList.get(position));
-                //intent.putExtra("username", username);
+                intent.putExtra("username", usernames.get(position));//we send username here, to avoid sending another query for it
                 v.getContext().startActivity(intent);
-                */
+
             }
         });
 

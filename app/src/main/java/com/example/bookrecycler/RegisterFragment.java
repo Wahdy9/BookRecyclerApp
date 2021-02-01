@@ -95,6 +95,7 @@ public class RegisterFragment extends Fragment {
                             userMap.put("name", name);
                             userMap.put("email", email);
                             userMap.put("phone", phone);
+                            userMap.put("major", "");
                             userMap.put("showPhone", true);
                             userMap.put("showEmail", true);
                             userMap.put("img_url", "default");
