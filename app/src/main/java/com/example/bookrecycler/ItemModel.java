@@ -1,9 +1,9 @@
 package com.example.bookrecycler;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.Date;
 
-public class ItemModel {
+public class ItemModel implements Serializable {
 
     String itemId, userId, title, price, desc, category, condition, itemImg;
     Date timePosted;

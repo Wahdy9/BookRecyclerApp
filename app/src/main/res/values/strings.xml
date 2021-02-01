@@ -6,8 +6,6 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
 
-
-
     <string-array name="spinner_category_types">
         <item>Computer</item>
         <item>Art</item>
