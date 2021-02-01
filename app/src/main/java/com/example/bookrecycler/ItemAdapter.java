@@ -66,7 +66,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if (documentSnapshot.exists()) {
-                    usernames.add(position, documentSnapshot.getString("name")) ;
+                    usernames.add(documentSnapshot.getString("name")) ;
                     holder.usernameTV.setText(documentSnapshot.getString("name"));
                 }
             }

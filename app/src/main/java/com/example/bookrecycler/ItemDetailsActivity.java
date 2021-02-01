@@ -140,7 +140,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         commentET.setText("");
                         commentList.add(commentToSent);
-                        //commentAdapter.notifyDataSetChanged();
+                        commentAdapter.notifyDataSetChanged();
                     }
                 }
             });
@@ -151,7 +151,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
     }
 
     private void loadComments(String itemId) {
-        /*
+
         //get comments from firestore and populate it in th comment recyclerView
         firestore.collection("Items").document(itemId).collection("Comments")
                 .orderBy("timestamp", Query.Direction.ASCENDING).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -169,25 +169,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
                 }
             }
         });
-         */
 
-        //get comments from firestore and populate it in th comment recyclerView in realtime
-        firestore.collection("Items").document(itemId).collection("Comments")
-                .orderBy("timestamp", Query.Direction.ASCENDING).addSnapshotListener(this,new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                if (!queryDocumentSnapshots.isEmpty()) {
-                    //this loop will check if document is added, if so then converted to obj and added to recyclerview, notify adapter
-                    for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
-                        if (doc.getType() == DocumentChange.Type.ADDED) {
-                            CommentModel comment = doc.getDocument().toObject(CommentModel.class);
-                            commentList.add(comment);
-                            commentAdapter.notifyDataSetChanged();
-                        }
-                    }
-                }
-            }
-        });
 
     }
 
