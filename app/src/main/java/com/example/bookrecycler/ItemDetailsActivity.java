@@ -120,6 +120,34 @@ public class ItemDetailsActivity extends AppCompatActivity {
             }
         });
 
+
+        //check if user logged in, assign a listner on username that take user to UsersProfileActivity
+        if (mAuth.getCurrentUser() != null) {
+            //if item belong to a current user, then he will not be able to open his profile, to avoid chatting with himself
+            if (!mAuth.getCurrentUser().getUid().equals(item.getUserId())) {
+                usernameTV.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(ItemDetailsActivity.this, UsersProfileActivity.class);
+                        intent.putExtra("userId", item.getUserId());
+                        startActivity(intent);
+                    }
+                });
+
+            }
+        }else{
+            //if user not logged in, just send him to UsersProfileActivity
+            usernameTV.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(ItemDetailsActivity.this, UsersProfileActivity.class);
+                    intent.putExtra("userId", item.getUserId());
+                    startActivity(intent);
+                }
+            });
+        }
+
+
         //get comments from firestore and display it in RV
         loadComments(item.getItemId());
 

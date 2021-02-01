@@ -31,6 +31,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
 
     //list to populate
     private ArrayList<ItemModel> itemList;
+
     //firebase
     private FirebaseFirestore firestore;
     private FirebaseAuth mAuth;
@@ -122,7 +123,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
                 //go to itemDetailActivity
                 Intent intent = new Intent(v.getContext(), ItemDetailsActivity.class);
                 intent.putExtra("item", itemList.get(position));
-                intent.putExtra("username", usernames.get(position));
+                intent.putExtra("username", usernames.get(position));//we send username here, to avoid sending another query for it
                 v.getContext().startActivity(intent);
 
             }
