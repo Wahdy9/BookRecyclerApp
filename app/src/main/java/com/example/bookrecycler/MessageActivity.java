@@ -1,12 +1,24 @@
 package com.example.bookrecycler;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Looper;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -15,6 +27,10 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.Timestamp;
@@ -47,6 +63,7 @@ public class MessageActivity extends AppCompatActivity {
     private TextView usernameTV;
     private ImageButton sendBtn, gpsBtn;
     private EditText msgET;
+    private ProgressDialog pd;
 
     //firebase
     private FirebaseAuth mAuth;
@@ -59,6 +76,9 @@ public class MessageActivity extends AppCompatActivity {
     private RecyclerView msgRV;
     private MessageAdapter msgAdapter;
     private List<MessageModel> msgList;
+
+    //location request code constant
+    public static final int LOCATION_REQUEST_CODE = 1;
 
 
     @Override
@@ -133,7 +153,131 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 
+        //send location when GPS btn  is clicked
+        gpsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(
+                            MessageActivity.this,
+                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                            LOCATION_REQUEST_CODE
+                    );
+                }else{
+                    getCurrentLocation();
+                }
+            }
+        });
 
+
+    }
+
+    //this method get the current location(Latitude and longitutde) and call sendlocation()
+    private void getCurrentLocation() {
+        //check if GPS on
+        if(locationEnabled()){
+            //gps is on, proceed to send the message
+            pd = new ProgressDialog(MessageActivity.this);
+            pd.setMessage("Sending Location...");
+            pd.show();
+
+            //setup location request
+            final LocationRequest locationRequest = new LocationRequest();
+            locationRequest.setInterval(10000);
+            locationRequest.setFastestInterval(3000);
+            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+            //send location request
+            LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(locationRequest, new LocationCallback(){
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+                    super.onLocationResult(locationResult);
+                    LocationServices.getFusedLocationProviderClient(MessageActivity.this).removeLocationUpdates(this);
+
+                    if(locationResult != null && locationResult.getLocations().size() > 0){
+                        int latestLocationIndex = locationResult.getLocations().size() -1;
+
+                        double latitude = locationResult.getLocations().get(latestLocationIndex).getLatitude();
+                        double longitude = locationResult.getLocations().get(latestLocationIndex).getLongitude();
+
+                        //send the message
+                        sendLocation(mAuth.getUid(),userId,latitude, longitude);
+                    }
+                }
+            }, Looper.getMainLooper());
+        }else{
+            //gos is off, show dialog to send user to the setting to enable it
+            new AlertDialog.Builder(MessageActivity.this )
+                    .setMessage( "Enable GPS" )
+                    .setPositiveButton( "Settings" , new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick (DialogInterface paramDialogInterface , int paramInt) {
+                                    startActivity( new Intent(Settings. ACTION_LOCATION_SOURCE_SETTINGS )) ;
+                                }
+                            })
+                    .setNegativeButton( "Cancel" , null )
+                    .show() ;
+        }
+
+    }
+
+    //upload the location to firestore and add entries in chatList if not exist
+    private void sendLocation(String sender, String receiver,double latitude, double longitude) {
+        HashMap<String, Object> msgMap = new HashMap<>();
+        msgMap.put("sender", sender);
+        msgMap.put("receiver", receiver);
+        msgMap.put("imageUrl", "");
+        msgMap.put("map", true);
+        msgMap.put("image", false);
+        msgMap.put("message", "");
+        msgMap.put("timestamp", FieldValue.serverTimestamp());
+        msgMap.put("geoPoint", new GeoPoint(latitude,longitude));
+
+        //upload to firestore to Chats
+        firestore.collection("Chats").document().set(msgMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                pd.dismiss();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                pd.dismiss();
+            }
+        });
+
+        //upload info about sender and reciever to DB-> Chatlist, so these users will aprear in chatListActivity
+        Map<String, Object> senderMap = new HashMap<>();
+        senderMap.put("id", receiver);
+        senderMap.put("newMsgs",false);
+        senderMap.put("timestamp", new Timestamp(new Date()));
+        firestore.collection("Chatlist").document(sender).collection("Contacted").document(receiver).set(senderMap);
+
+        Map<String, Object> receiverMap = new HashMap<>();
+        receiverMap.put("id", sender);
+        receiverMap.put("newMsgs",true);//so when reciever logged in the badge will show.
+        receiverMap.put("timestamp", new Timestamp(new Date()));
+        firestore.collection("Chatlist").document(receiver).collection("Contacted").document(sender).set(receiverMap);
+    }
+
+    //this method check if GPS is on or off, return true if on, false otherwise
+    private boolean locationEnabled() {
+        LocationManager lm = (LocationManager)
+                getSystemService(Context.LOCATION_SERVICE ) ;
+        boolean gps_enabled = false;
+        boolean network_enabled = false;
+        try {
+            gps_enabled = lm.isProviderEnabled(LocationManager. GPS_PROVIDER ) ;
+        } catch (Exception e) {
+            e.printStackTrace() ;
+        }
+        try {
+            network_enabled = lm.isProviderEnabled(LocationManager. NETWORK_PROVIDER ) ;
+        } catch (Exception e) {
+            e.printStackTrace() ;
+        }
+
+        return (gps_enabled && network_enabled);
     }
 
     //upload the msg to firestore and add entries in chatList if not exist
@@ -143,8 +287,8 @@ public class MessageActivity extends AppCompatActivity {
         msgMap.put("sender", sender);
         msgMap.put("receiver", receiver);
         msgMap.put("imageUrl", "");
-        msgMap.put("isMap", false);
-        msgMap.put("isImage", false);
+        msgMap.put("map", false);
+        msgMap.put("image", false);
         msgMap.put("message", message);
         msgMap.put("timestamp", FieldValue.serverTimestamp());
         msgMap.put("geoPoint", new GeoPoint(0,0));
@@ -152,7 +296,7 @@ public class MessageActivity extends AppCompatActivity {
         //upload to firestore to Chats
         firestore.collection("Chats").document().set(msgMap);
 
-        //add info about sender and reciever to DB-> Chatlist
+        //upload info about sender and reciever to DB-> Chatlist, so these users will aprear in chatListActivity
         Map<String, Object> senderMap = new HashMap<>();
         senderMap.put("id", receiver);
         senderMap.put("newMsgs",false);
@@ -192,6 +336,7 @@ public class MessageActivity extends AppCompatActivity {
         });
     }
 
+    //initialize recycler view
     private void initializeRV() {
         msgList = new ArrayList<>();
         msgRV = findViewById(R.id.msgRV);
@@ -204,5 +349,21 @@ public class MessageActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         readMessages();
+    }
+
+    //location permeission request received here, if allow call getCurrentLocation()
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if(requestCode == LOCATION_REQUEST_CODE && grantResults.length >0){
+            if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                //location permission is granted
+                getCurrentLocation();
+            }else{
+                //location permission is denied
+                Toast.makeText(this, "Location permission is required!", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }

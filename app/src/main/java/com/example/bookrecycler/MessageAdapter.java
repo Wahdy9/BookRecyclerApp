@@ -67,9 +67,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
         final MessageModel msg = msgList.get(position);
 
+        System.out.println("*****************MsgAdapter- isMap = " +msg.isMap());
+
         if(msg.isMap()) {
             //if the msg is a location
-
+            System.out.println("*****************MsgAdapter-inside is a map-  latitude= " + msg.getGeoPoint().getLatitude() +"Longtitude= " + msg.getGeoPoint().getLongitude());
             //set and show image and text "My Location"
             holder.show_message.setText("My Location");
             holder.myLocationIV.setVisibility(View.VISIBLE);
@@ -95,9 +97,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             });
         }else if(msg.isImage()){
             //if msg is an image
+            System.out.println("*****************MsgAdapter-inside is a image-  latitude= " + msg.getGeoPoint().getLatitude() +"Longtitude= " + msg.getGeoPoint().getLongitude());
 
         }else{
             //if msg is just a text
+            System.out.println("*****************MsgAdapter-inside is a else-  latitude= " + msg.getGeoPoint().getLatitude() +"Longtitude= " + msg.getGeoPoint().getLongitude());
+
             holder.show_message.setText(msg.getMessage());
             holder.myLocationIV.setVisibility(View.GONE);
         }

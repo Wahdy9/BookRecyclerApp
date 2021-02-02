@@ -9,8 +9,8 @@ public class MessageModel {
     private String sender;
     private String receiver;
     private String imageUrl;
-    private boolean isMap;
-    private boolean isImage;
+    private boolean map;
+    private boolean image;
     private String message;
     private Date timestamp;
     private GeoPoint geoPoint;
@@ -18,12 +18,12 @@ public class MessageModel {
     public MessageModel() {
     }
 
-    public MessageModel(String sender, String receiver, String imageUrl, boolean isMap, boolean isImage, String message, Date timestamp, GeoPoint geoPoint) {
+    public MessageModel(String sender, String receiver, String imageUrl, boolean map, boolean image, String message, Date timestamp, GeoPoint geoPoint) {
         this.sender = sender;
         this.receiver = receiver;
         this.imageUrl = imageUrl;
-        this.isMap = isMap;
-        this.isImage = isImage;
+        this.map = map;
+        this.image = image;
         this.message = message;
         this.timestamp = timestamp;
         this.geoPoint = geoPoint;
@@ -54,19 +54,19 @@ public class MessageModel {
     }
 
     public boolean isMap() {
-        return isMap;
+        return map;
     }
 
     public void setMap(boolean map) {
-        isMap = map;
+        this.map = map;
     }
 
     public boolean isImage() {
-        return isImage;
+        return image;
     }
 
     public void setImage(boolean image) {
-        isImage = image;
+        this.image = image;
     }
 
     public String getMessage() {
