@@ -1,19 +1,28 @@
 package com.example.bookrecycler;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.text.format.DateUtils;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -21,6 +30,8 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -83,7 +94,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
         firestore.collection("Items").document(itemList.get(position).getItemId()).collection("Comments").addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                if (!queryDocumentSnapshots.isEmpty()) {
+                if (!queryDocumentSnapshots.isEmpty()) {//if no comments
                     int commentCount = queryDocumentSnapshots.size();
                     holder.commentCountTV.setText(commentCount + "");
                 } else {
@@ -101,12 +112,53 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
 
         //if item belong to current user, show more btn, so user can edit or delete item
         if(mAuth.getCurrentUser() != null) {
-            if (mAuth.getCurrentUser().getUid().equals(itemList.get(position).getUserId())) {
+            if (mAuth.getCurrentUser().getUid().equals(itemList.get(holder.getAdapterPosition()).getUserId())) {
                 holder.moreIV.setVisibility(View.VISIBLE);
                 holder.moreIV.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        //show dialog with two options, edit and delete
+                        //show popup menu with two options, edit and delete
+                        //create options
+                        PopupMenu popupMenu = new PopupMenu(mContext, holder.moreIV, Gravity.END);
+
+                        //add delete and edit entries in the menu
+                        popupMenu.getMenu().add(Menu.NONE, 0,0,"Delete");
+                        popupMenu.getMenu().add(Menu.NONE, 1,0,"Edit");
+
+                        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                            @Override
+                            public boolean onMenuItemClick(MenuItem item) {
+                                int id = item.getItemId();
+                                if(id==0){
+                                    //delete item
+                                    //Show warning dialog first
+                                    new AlertDialog.Builder(mContext)
+                                            .setTitle("Delete")
+                                            .setMessage("Are you sure you want to delete?")
+                                            .setIcon(android.R.drawable.ic_dialog_alert)
+                                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    //if yes, begin the delete
+                                                    beginDelete(itemList.get(position).getItemId(), itemList.get(position).getItemImg());
+                                                }
+                                            }).setNegativeButton(android.R.string.no, null).show();
+
+                                }else if(id ==1){
+                                    //edit item
+                                    //start AddPostActivity with extras:edit_mode & itemToEdit
+                                    Intent intent = new Intent(mContext, AddItemActivity.class);
+                                    intent.putExtra("edit_mode", true);
+                                    intent.putExtra("item_to_edit", itemList.get(position));
+                                    mContext.startActivity(intent);
+                                }
+
+                                return false;
+                            }
+                        });
+
+                        //show popup menu
+                        popupMenu.show();
                     }
                 });
             }
@@ -128,15 +180,47 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
 
     }
 
+    //delete the item
+    private void beginDelete(final String itemId, String itemImg) {
+        final ProgressDialog pd = new ProgressDialog(mContext);
+        pd.setMessage("Deleting..");
+        pd.show();
+        /*
+        steps:
+            1- delete img from storage
+            2- delete item from firestore
+         */
+        StorageReference imgRef = FirebaseStorage.getInstance().getReferenceFromUrl(itemImg);
+        imgRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                firestore.collection("Items").document(itemId).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        //refresh the RV in the Main Activity
+                        if (mContext instanceof MainActivity) {
+                            ((MainActivity)mContext).populateRV();
+                        }
+
+                        Toast.makeText(mContext, "Deleted Successfully", Toast.LENGTH_SHORT).show();
+                        pd.dismiss();
+                    }
+                });
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                //fail to delete img
+                pd.dismiss();
+                Toast.makeText(mContext, "Error:" + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+
     @Override
     public int getItemCount() {
         return itemList.size();
-    }
-
-    //this method used in filtering, used in MainActivity
-    public void filterList(ArrayList<ItemModel> filteredList) {
-        itemList = filteredList;
-        notifyDataSetChanged();
     }
 
 

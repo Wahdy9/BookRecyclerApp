@@ -25,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -67,6 +68,11 @@ public class AddItemActivity extends AppCompatActivity {
     //img picked uri
     Uri image_uri = null;
 
+    //boolean to determine if its edit mode or not
+    boolean isEditMode;
+    //item to edit
+    ItemModel itemToEdit;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,6 +108,35 @@ public class AddItemActivity extends AppCompatActivity {
         cameraPermission = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
         storagePermission = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
+        //check if its edit mode
+        isEditMode = getIntent().getBooleanExtra("edit_mode", false);
+        if(isEditMode){
+            //change the toolbar title
+            getSupportActionBar().setTitle("Edit Item");
+            //get the item to edit
+            itemToEdit = (ItemModel)getIntent().getSerializableExtra("item_to_edit");
+
+            //load data to the views so we can edit them
+            image_uri = Uri.parse(itemToEdit.getItemImg());
+            Glide.with(this).load(image_uri).into(addImgBtn);
+            titleET.setText(itemToEdit.getTitle());
+            priceET.setText(itemToEdit.getPrice());
+            descET.setText(itemToEdit.getDesc());
+            addItemBtn.setText("Update Item");
+
+            //load the spinners
+            int categoryIndex = getCategorySpinnerPosition();
+            int conditionIndex = getConditionSpinnerPosition();
+            if(categoryIndex != -1){
+                categorySpinner.setSelection(categoryIndex);
+            }
+            if(conditionIndex != -1){
+                conditionSpinner.setSelection(conditionIndex);
+            }
+
+        }
+
+        //Click listener to handle clicking on the add image
         addImgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -109,15 +144,139 @@ public class AddItemActivity extends AppCompatActivity {
             }
         });
 
+        //Click listener to handle clicking on the upload btn
         addItemBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                uploadItem();
+                if(isEditMode){
+                    uploadEditedItem();
+                }else{
+                    uploadItem();
+                }
             }
         });
 
     }
 
+
+    //return the index of a specific category
+    private int getCategorySpinnerPosition() {
+        String[] categories = getResources().getStringArray(R.array.spinner_category_types);
+        for (int i = 0; i < categories.length;i++) {
+            if(categories[i].equalsIgnoreCase(itemToEdit.getCategory())){
+                return i;
+            }
+        }
+        return -1;
+    }
+    //return the index of a specific condition
+    private int getConditionSpinnerPosition() {
+        String[] conditions = getResources().getStringArray(R.array.spinner_condition_types);
+        for (int i = 0; i < conditions.length;i++) {
+            if(conditions[i].equalsIgnoreCase(itemToEdit.getCategory())){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    //upload the edited item
+    private void uploadEditedItem() {
+        //get the values
+        final String title = titleET.getText().toString().trim();
+        final String price = priceET.getText().toString().trim();
+        final String description = descET.getText().toString().trim();
+
+
+        //check if values not empty
+        if(!TextUtils.isEmpty(title) && !TextUtils.isEmpty(price) && !TextUtils.isEmpty(description)){
+            final ProgressDialog pd = new ProgressDialog(this);
+            pd.setMessage("Updating");
+            pd.show();
+
+            //check if user picked newer image
+            if(!image_uri.toString().equalsIgnoreCase(itemToEdit.getItemImg())){
+                //upload the new image with the same name as prevous to overwrite
+
+                //TODO: Compress image here
+
+                //upload img to storage
+                final StorageReference imgStorageRef = firebaseStorage.getReference().child("Items Image").child(itemToEdit.getItemId());
+                imgStorageRef.putFile(image_uri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                        if(task.isSuccessful()){
+                            //img uploaded successfully
+                            //get the download uri
+                            imgStorageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+
+                                    //create item map to upload it to firestore
+                                    final Map<String, Object> itemMap = new HashMap<>();
+                                    itemMap.put("title", title);
+                                    itemMap.put("price", price);
+                                    itemMap.put("desc", description);
+                                    itemMap.put("category", categorySpinner.getSelectedItem().toString());
+                                    itemMap.put("condition", conditionSpinner.getSelectedItem().toString());
+                                    itemMap.put("itemImg", uri.toString());
+
+                                    //upload to firestroe, update the document
+                                    firestore.collection("Items").document(itemToEdit.getItemId()).update(itemMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                Toast.makeText(AddItemActivity.this, "Item updated successfully", Toast.LENGTH_LONG).show();
+                                                finish();
+                                            } else {
+                                                Toast.makeText(AddItemActivity.this, "Firestore error:" + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                            }
+                                            pd.dismiss();
+                                        }
+                                    });
+
+                                }
+                            });
+                        }
+                    }
+                });
+
+
+
+            }else{
+                //if user didnt pick a new image, just update the other fields
+                //create item map to upload it to firestore
+                final Map<String, Object> itemMap = new HashMap<>();
+                itemMap.put("title", title);
+                itemMap.put("price", price);
+                itemMap.put("desc", description);
+                itemMap.put("category", categorySpinner.getSelectedItem().toString());
+                itemMap.put("condition", conditionSpinner.getSelectedItem().toString());
+
+                //upload to firestroe, update the document
+                firestore.collection("Items").document(itemToEdit.getItemId()).update(itemMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(AddItemActivity.this, "Item updated successfully", Toast.LENGTH_LONG).show();
+                            finish();
+                        } else {
+                            Toast.makeText(AddItemActivity.this, "Firestore error:" + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                        pd.dismiss();
+                    }
+                });
+            }
+
+
+        }else{
+            //fields values not filled
+            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    //upload the item
     private void uploadItem() {
         //get the values
         final String title = titleET.getText().toString().trim();
@@ -125,67 +284,72 @@ public class AddItemActivity extends AppCompatActivity {
         final String description = descET.getText().toString().trim();
 
         //check if values not empty
-        if(!TextUtils.isEmpty(title) && !TextUtils.isEmpty(price) && !TextUtils.isEmpty(description) && image_uri != null){
+        if(!TextUtils.isEmpty(title) && !TextUtils.isEmpty(price) && !TextUtils.isEmpty(description)){
+            if(image_uri != null) {
+                final ProgressDialog pd = new ProgressDialog(this);
+                pd.setMessage("Uploading");
+                pd.show();
 
-            final ProgressDialog pd = new ProgressDialog(this);
-            pd.setMessage("Uploading");
-            pd.show();
+                //get random itemID
+                final DocumentReference itemRef = firestore.collection("Items").document();
+                final String itemId = itemRef.getId();
 
-            //get random itemID
-            final DocumentReference itemRef = firestore.collection("Items").document();
-            final String itemId = itemRef.getId();
+                //TODO: Compress image here
 
 
-            //upload img to storage
-            final StorageReference imgStorageRef = firebaseStorage.getReference().child("Items Image").child(itemId);
-            imgStorageRef.putFile(image_uri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                    if (task.isSuccessful()) {
-                        //img uploaded successfully
-                        //get the download uri
-                        imgStorageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                            @Override
-                            public void onSuccess(Uri uri) {
+                //upload img to storage
+                final StorageReference imgStorageRef = firebaseStorage.getReference().child("Items Image").child(itemId);
+                imgStorageRef.putFile(image_uri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            //img uploaded successfully
+                            //get the download uri
+                            imgStorageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
 
-                                //create item map to upload it to firestore
-                                final Map<String,Object> itemMap = new HashMap<>();
-                                itemMap.put("itemId", itemId);
-                                itemMap.put("userId", FirebaseAuth.getInstance().getUid());
-                                itemMap.put("title", title);
-                                itemMap.put("price", price);
-                                itemMap.put("desc", description);
-                                itemMap.put("category", categorySpinner.getSelectedItem().toString());
-                                itemMap.put("condition", conditionSpinner.getSelectedItem().toString());
-                                itemMap.put("itemImg", uri.toString());
-                                itemMap.put("timePosted", new Timestamp(new Date()));
+                                    //create item map to upload it to firestore
+                                    final Map<String, Object> itemMap = new HashMap<>();
+                                    itemMap.put("itemId", itemId);
+                                    itemMap.put("userId", FirebaseAuth.getInstance().getUid());
+                                    itemMap.put("title", title);
+                                    itemMap.put("price", price);
+                                    itemMap.put("desc", description);
+                                    itemMap.put("category", categorySpinner.getSelectedItem().toString());
+                                    itemMap.put("condition", conditionSpinner.getSelectedItem().toString());
+                                    itemMap.put("itemImg", uri.toString());
+                                    itemMap.put("timePosted", new Timestamp(new Date()));
 
-                                //upload to firestroe
-                                firestore.collection("Items").document(itemId).set(itemMap).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if(task.isSuccessful()){
-                                            Toast.makeText(AddItemActivity.this, "Item uploaded successfully", Toast.LENGTH_LONG).show();
-                                            finish();
-                                        }else{
-                                            Toast.makeText(AddItemActivity.this, "Firestore error:" + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                    //upload to firestroe
+                                    firestore.collection("Items").document(itemId).set(itemMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                Toast.makeText(AddItemActivity.this, "Item uploaded successfully", Toast.LENGTH_LONG).show();
+                                                finish();
+                                            } else {
+                                                Toast.makeText(AddItemActivity.this, "Firestore error:" + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                            }
+                                            pd.dismiss();
                                         }
-                                        pd.dismiss();
-                                    }
-                                });
+                                    });
 
-                            }
-                        });
+                                }
+                            });
 
 
-                    } else {
-                        pd.dismiss();
-                        Toast.makeText(AddItemActivity.this, "Storage Error : " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        } else {
+                            pd.dismiss();
+                            Toast.makeText(AddItemActivity.this, "Storage Error : " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        }
                     }
-                }
-            });
+                });
 
-
+            }else{
+                //image is not picked
+                Toast.makeText(this, "Please pick an image", Toast.LENGTH_SHORT).show();
+            }
 
         }else{
             //fields values not filled
@@ -196,6 +360,8 @@ public class AddItemActivity extends AppCompatActivity {
 
 
     }
+
+
 
     //show a dialog to pick the image from gallery or camera
     private void showImagePickDialog() {
@@ -227,7 +393,6 @@ public class AddItemActivity extends AppCompatActivity {
                 }).show();
     }
 
-
     //true if permission already granted, false otherwise.
     boolean checkStoragePermission(){
         boolean result = ContextCompat.checkSelfPermission(this,
@@ -238,6 +403,7 @@ public class AddItemActivity extends AppCompatActivity {
     private void requestStoragePermission() {
         ActivityCompat.requestPermissions(this, storagePermission,STORAGE_REQUEST_CODE);
     }
+    //true if permission already granted, false otherwise.
     boolean checkCameraPermission(){
         boolean result = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.CAMERA) == (PackageManager.PERMISSION_GRANTED);
@@ -245,16 +411,19 @@ public class AddItemActivity extends AppCompatActivity {
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) == (PackageManager.PERMISSION_GRANTED);
         return result && result1;
     }
+    //request permission(show popup) --> result in activityPermissionResult
     private void requestCameraPermission() {
         ActivityCompat.requestPermissions(this, cameraPermission,CAMERA_REQUEST_CODE);
     }
 
+    //pick image from gallery
     void pickFromGallery() {
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType("image/*");
         startActivityForResult(intent, IMAGE_PICK_GALLERY_CODE);
     }
 
+    //pick image from camera
     void pickFromCamera() {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MediaStore.Images.Media.TITLE, "Temp Image Title");
@@ -269,6 +438,7 @@ public class AddItemActivity extends AppCompatActivity {
 
 
 
+    //permission results received here
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
@@ -302,6 +472,7 @@ public class AddItemActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
+    //results of picking an image
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (resultCode == RESULT_OK) {
