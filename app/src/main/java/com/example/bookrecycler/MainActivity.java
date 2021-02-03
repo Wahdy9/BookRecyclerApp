@@ -16,6 +16,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -64,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
     //RecyclerView
     private RecyclerView itemRV;
     private ItemAdapter itemAdapter;
-    ArrayList<ItemModel> itemList;
+    private ArrayList<ItemModel> itemList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -175,6 +176,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 filter(s.toString());
+
             }
         });
 
@@ -192,11 +194,9 @@ public class MainActivity extends AppCompatActivity {
                 filteredList.add(itemList.get(i));
             }
         }
-        itemAdapter.filterList(filteredList);
+        itemAdapter = new ItemAdapter(filteredList);
+        itemRV.setAdapter(itemAdapter);
     }
-
-
-
 
     //load the drawer Layout based on user if he logged or guest
     private void changesDrawerLayout() {
@@ -246,7 +246,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //get data from firestore and populate the recyclerView
-    private void populateRV() {
+    public void populateRV() {
         itemList.clear();//to avoid repetition
 
         //show progress dialog
@@ -359,7 +359,7 @@ public class MainActivity extends AppCompatActivity {
     //init selected items(by default All) -> these variables used to save the options user selected in the filtring, and used for sending queries
     private String selectedCategory = "All", selectedCondition = "All";
     private int selectedCategoryPosition = 0, selectedConditionPosition=0;
-    //setup and display bottomsheet
+    //setup and display bottomSheet
     private void filterBottomSheet() {
         //inflate (filter_bottom_layout) and its views for bottom sheet
         View view = LayoutInflater.from(this).inflate(R.layout.filter_bottom_layout, null);
@@ -440,5 +440,31 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         changesDrawerLayout();
+    }
+
+    //Option menu
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_option_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.option_language) {
+            //change language here
+
+
+        }else if(item.getItemId() == R.id.option_refresh){
+            //refresh the activity
+            searchET.clearFocus();
+            searchET.setText("");
+            selectedCategoryPosition = 0;
+            selectedConditionPosition = 0;
+            selectedCategory = "All";
+            selectedCondition = "All";
+            populateRV();
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }
