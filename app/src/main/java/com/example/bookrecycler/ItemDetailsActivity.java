@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
@@ -99,11 +100,20 @@ public class ItemDetailsActivity extends AppCompatActivity {
         //assign values to view
         Glide.with(this).load(item.getItemImg()).into(imageIV);
         titleTV.setText(item.getTitle());
-        usernameTV.setText(getIntent().getStringExtra("username"));
         priceTV.setText(item.getPrice());
         conditionTV.setText(item.getCondition());
         categoryTV.setText(item.getCategory());
         descritionTV.setText(item.getDesc());
+
+        //get username from firestore using userId then set the view
+        firestore.collection("Users").document(item.userId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if (documentSnapshot.exists()) {
+                    usernameTV.setText(documentSnapshot.getString("name"));
+                }
+            }
+        });
 
         //handle clicks of send comment btn
         sendCommentBtn.setOnClickListener(new View.OnClickListener() {
@@ -121,31 +131,17 @@ public class ItemDetailsActivity extends AppCompatActivity {
         });
 
 
-        //check if user logged in, assign a listner on username that take user to UsersProfileActivity
-        if (mAuth.getCurrentUser() != null) {
-            //if item belong to a current user, then he will not be able to open his profile, to avoid chatting with himself
-            if (!mAuth.getCurrentUser().getUid().equals(item.getUserId())) {
-                usernameTV.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(ItemDetailsActivity.this, UsersProfileActivity.class);
-                        intent.putExtra("userId", item.getUserId());
-                        startActivity(intent);
-                    }
-                });
 
+        //assign a listner on username that take user to UsersProfileActivity
+        usernameTV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ItemDetailsActivity.this, UsersProfileActivity.class);
+                intent.putExtra("userId", item.getUserId());
+                startActivity(intent);
             }
-        }else{
-            //if user not logged in, just send him to UsersProfileActivity
-            usernameTV.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(ItemDetailsActivity.this, UsersProfileActivity.class);
-                    intent.putExtra("userId", item.getUserId());
-                    startActivity(intent);
-                }
-            });
-        }
+        });
+
 
 
         //get comments from firestore and display it in RV

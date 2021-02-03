@@ -6,6 +6,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -82,14 +83,16 @@ public class UsersProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(mAuth.getCurrentUser() != null) {
-                    Toast.makeText(UsersProfileActivity.this, "Chat activity not imepelemted yet", Toast.LENGTH_SHORT).show();
-                    //Intent intent = new Intent(UsersProfileActivity.this, MessageActivity.class);
-                    //intent.putExtra("userId", userId);
-                    //startActivity(intent);
+                    //this if is to prevent user to chat with himself
+                    if(!mAuth.getCurrentUser().getUid().equals(userId)) {
+                        Intent intent = new Intent(UsersProfileActivity.this, MessageActivity.class);
+                        intent.putExtra("userId", userId);
+                        startActivity(intent);
+                    }
                 }else{
                     Toast.makeText(UsersProfileActivity.this, "You need to login..", Toast.LENGTH_LONG).show();
-                    //Intent intent = new Intent(UserProfileActivity.this, LoginActivity.class);
-                    //startActivity(intent);
+                    Intent intent = new Intent(UsersProfileActivity.this, LoginAndRegisterActivity.class);
+                    startActivity(intent);
                 }
             }
         });
@@ -122,8 +125,7 @@ public class UsersProfileActivity extends AppCompatActivity {
                     if(profileImgUrl != null){
                         //assign image
                         if (!profileImgUrl.equals("default")) {
-                            RequestOptions requestOptions = new RequestOptions();
-                            requestOptions.placeholder(R.drawable.user_profile);
+                            RequestOptions requestOptions = new RequestOptions().placeholder(R.drawable.user_profile);
                             Glide.with(UsersProfileActivity.this).setDefaultRequestOptions(requestOptions).load(profileImgUrl).into(profileImg);
 
                         }

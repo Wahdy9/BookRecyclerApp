@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -38,12 +39,9 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
 
     private Context mContext;
 
-    private ArrayList<String> usernames;//store usernames, to pass it to details activity, since item dont have the username, it have only userId
-
 
     public ItemAdapter(ArrayList<ItemModel> itemList) {
         this.itemList = itemList;
-        this.usernames = new ArrayList<>();
         firestore = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
     }
@@ -62,12 +60,11 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
         //set title
         holder.titleTV.setText(itemList.get(position).title);
 
-        //set username
+        //get username from firestore using userId then set the view
         firestore.collection("Users").document(itemList.get(position).userId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if (documentSnapshot.exists()) {
-                    usernames.add(documentSnapshot.getString("name")) ;
                     holder.usernameTV.setText(documentSnapshot.getString("name"));
                 }
             }
@@ -95,8 +92,9 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
             }
         });
 
-        //set item image
-        Glide.with(mContext).load(itemList.get(position).itemImg).into(holder.imgIV);
+        //set item image and add a placeholder, just incase
+        RequestOptions requestOptions = new RequestOptions().placeholder(R.color.colorGrey2);
+        Glide.with(mContext).setDefaultRequestOptions(requestOptions).load(itemList.get(position).itemImg).into(holder.imgIV);
 
         //set category
         holder.categoryTV.setText(itemList.get(position).category);
@@ -123,7 +121,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
                 //go to itemDetailActivity
                 Intent intent = new Intent(v.getContext(), ItemDetailsActivity.class);
                 intent.putExtra("item", itemList.get(position));
-                intent.putExtra("username", usernames.get(position));//we send username here, to avoid sending another query for it
                 v.getContext().startActivity(intent);
 
             }

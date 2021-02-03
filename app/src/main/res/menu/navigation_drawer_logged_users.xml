@@ -8,8 +8,8 @@
                 android:title="Profile"
                 android:icon="@drawable/ic_account"/>
             <item
-                android:id="@+id/nav_log_posts"
-                android:title="Posts"
+                android:id="@+id/nav_log_items"
+                android:title="My Items"
                 android:icon="@drawable/ic_items"/>
             <item
                 android:id="@+id/nav_log_favorite"
@@ -25,14 +25,11 @@
                 android:icon="@drawable/ic_logout"/>
         </menu>
     </item>
-
     <item
         android:id="@+id/nav_contact"
         android:title="Contact" />
     <item
         android:id="@+id/nav_faq"
         android:title="FAQ" />
-
-
 
 </menu>

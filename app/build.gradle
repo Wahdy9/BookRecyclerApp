@@ -47,4 +47,8 @@ dependencies {
     //compressor
     implementation 'id.zelory:compressor:2.1.0'
 
+    //for the location
+    implementation 'com.google.android.gms:play-services-location:17.1.0'
+
+
 }

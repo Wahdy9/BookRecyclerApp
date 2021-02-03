@@ -103,8 +103,8 @@ public class MainActivity extends AppCompatActivity {
                 switch (item.getItemId()){
                     /////////////////////////////////items of Guest user layout/////////////////////////////////////
                     case R.id.nav_def_signin:
-                        Intent intent = new Intent(getApplicationContext(), LoginAndRegisterActivity.class);
-                        startActivity(intent);
+                        Intent LoginIntent = new Intent(MainActivity.this, LoginAndRegisterActivity.class);
+                        startActivity(LoginIntent);
                         break;
                     case R.id.nav_contact:
                         Toast.makeText(MainActivity.this, "Contact", Toast.LENGTH_SHORT).show();
@@ -117,20 +117,20 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.nav_log_profile:
                         startActivity(new Intent(MainActivity.this, MyProfileActivity.class));
                         break;
-                    case R.id.nav_log_posts:
+                    case R.id.nav_log_items:
                         Toast.makeText(MainActivity.this, "Items", Toast.LENGTH_SHORT).show();
                         break;
                     case R.id.nav_log_favorite:
                         Toast.makeText(MainActivity.this, "Favorite", Toast.LENGTH_SHORT).show();
                         break;
                     case R.id.nav_log_chats:
-                        Toast.makeText(MainActivity.this, "Chats", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(MainActivity.this, ChatListActivity.class));
                         break;
                     case R.id.nav_log_logout:
                         Toast.makeText(MainActivity.this, "logout from account", Toast.LENGTH_SHORT).show();
                         mAuth.signOut();
                         changesDrawerLayout();
-                        populateRV(); //to refresh after sign put
+                        populateRV(); //to refresh after sign out
                         break;
                 }
                 //close drawer after clicking an item
@@ -258,7 +258,7 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setSubtitle( "Category:"+ selectedCategory+ ", Condition:" + selectedCondition);
 
 
-        //get all posts from firestore DEPENDING of the filters, add them to recyclerview.
+        //send query to firestore DEPENDING of the filters, add the items them to recyclerview.
         if(selectedCategory.equalsIgnoreCase("All") && //if both category and condition are All
                 selectedCondition.equalsIgnoreCase("All")) {
 
