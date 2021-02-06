@@ -119,10 +119,10 @@ public class MainActivity extends AppCompatActivity {
                         startActivity(new Intent(MainActivity.this, MyProfileActivity.class));
                         break;
                     case R.id.nav_log_items:
-                        Toast.makeText(MainActivity.this, "Items", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(MainActivity.this, MyItemsActivity.class));
                         break;
                     case R.id.nav_log_favorite:
-                        Toast.makeText(MainActivity.this, "Favorite", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(MainActivity.this, FavoriteActivity.class));
                         break;
                     case R.id.nav_log_chats:
                         startActivity(new Intent(MainActivity.this, ChatListActivity.class));
