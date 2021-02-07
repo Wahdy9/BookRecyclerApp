@@ -50,4 +50,7 @@ dependencies {
     //for the location
     implementation 'com.google.android.gms:play-services-location:17.1.0'
 
+    //for google sign in
+    implementation 'com.google.android.gms:play-services-auth:19.0.0'
+
 }
