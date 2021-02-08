@@ -367,9 +367,13 @@ public class MainActivity extends AppCompatActivity {
         Spinner conditionSpinner = view.findViewById(R.id.bottom_sheet_condition_spinner);
         Button applyBtn = view.findViewById(R.id.bottom_sheet_apply_btn);
 
+        //TODO:Move Constant class to Strings.xml and create the arrays here(DONE)
+        final String[] categories = getResources().getStringArray(R.array.spinner_category_search);
+        final String[] conditions = getResources().getStringArray(R.array.spinner_condition_search);
+
         //create an array adapter using the string array and default spinner layout
-        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,Constants.CATEGORIES);
-        ArrayAdapter<String> conditionAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,Constants.CONDITIONS);
+        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categories);
+        ArrayAdapter<String> conditionAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, conditions);
         //specify the layout ti use when list of choices appears
         categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         conditionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -384,7 +388,7 @@ public class MainActivity extends AppCompatActivity {
         categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedCategory = Constants.CATEGORIES[position];
+                selectedCategory = categories[position];
                 selectedCategoryPosition = position;
             }
 
@@ -396,7 +400,7 @@ public class MainActivity extends AppCompatActivity {
         conditionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedCondition = Constants.CONDITIONS[position];
+                selectedCondition = conditions[position];
                 selectedConditionPosition = position;
             }
 

@@ -18,6 +18,34 @@
         app:layout_constraintTop_toTopOf="parent"
         app:popupTheme="@style/MenuStyle" />
 
+    <!-- For the search area -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/chatlist_search_cl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar">
+
+        <EditText
+            android:id="@+id/chatlist_search_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:background="@drawable/shape_rectangle"
+            android:hint="search"
+            android:padding="8dp"
+            android:textColor="@android:color/black"
+            android:textColorHint="@color/colorGrey3"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/chat_list_rv"
         android:layout_width="0dp"
@@ -26,6 +54,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+        app:layout_constraintTop_toBottomOf="@+id/chatlist_search_cl" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

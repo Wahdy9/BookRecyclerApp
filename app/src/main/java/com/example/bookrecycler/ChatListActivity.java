@@ -6,7 +6,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
+import android.widget.EditText;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -20,6 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChatListActivity extends AppCompatActivity {
+
+
+    //Views
+    private EditText searchET;
 
     //Recyclerview
     private RecyclerView chatsRV;
@@ -49,6 +56,9 @@ public class ChatListActivity extends AppCompatActivity {
             }
         });
 
+        //initialize views
+        searchET = findViewById(R.id.chatlist_search_et);
+
         //initialize recyclerview
         initializeRV();
 
@@ -56,6 +66,24 @@ public class ChatListActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
 
+        //add text listener to filter
+        searchET.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                filter(s.toString());
+
+            }
+        });
 
         //get users we chatted with, display them in RV
         firestore.collection("Chatlist").document(mAuth.getUid()).collection("Contacted").orderBy("timestamp", Query.Direction.ASCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
@@ -94,6 +122,19 @@ public class ChatListActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    //this method used to filter RV when typing in search field
+    private void filter(String text) {
+        ArrayList<UserModel> filteredList = new ArrayList<>();
+
+        for (int i = 0; i < usersList.size(); i++) {
+            if (mUsers.get(i).getName().toLowerCase().contains(text.toLowerCase())) {
+                filteredList.add(mUsers.get(i));
+            }
+        }
+        chatsAdapter = new ChatListAdapter(this, filteredList);
+        chatsRV.setAdapter(chatsAdapter);
     }
 
     private void initializeRV() {

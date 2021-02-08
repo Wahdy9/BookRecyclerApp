@@ -8,13 +8,17 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
@@ -29,6 +33,7 @@ public class FavoriteActivity extends AppCompatActivity {
     //Views
     private SwipeRefreshLayout refreshLayout;
     private TextView notFoundTV;
+    private EditText searchET;
 
     //Fireabse
     private FirebaseFirestore firestore;
@@ -54,6 +59,8 @@ public class FavoriteActivity extends AppCompatActivity {
         //iniatilize views
         refreshLayout = findViewById(R.id.favorite_refresh_layout);
         notFoundTV =findViewById(R.id.favorite_found_tv);
+        searchET = findViewById(R.id.favorite_search_et);
+
 
         //iniatilize firebase
         mAuth = FirebaseAuth.getInstance();
@@ -75,12 +82,44 @@ public class FavoriteActivity extends AppCompatActivity {
             }
         });
 
+        //add text listener to filter
+        searchET.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                filter(s.toString());
+
+            }
+        });
+
         initializeRV();
 
         populateRV();
     }
 
-    //get items ids from Favorites, and call getPosts.
+    //this method used to filter RV when typing in search field
+    private void filter(String text) {
+        ArrayList<ItemModel> filteredList = new ArrayList<>();
+
+        for (int i = 0; i < itemList.size(); i++) {
+            if (itemList.get(i).getTitle().toLowerCase().contains(text.toLowerCase())) {
+                filteredList.add(itemList.get(i));
+            }
+        }
+        itemAdapter = new ItemAdapter(filteredList);
+        itemRV.setAdapter(itemAdapter);
+    }
+
+    //get items ids from Favorites, and call loadItems.
     private void populateRV() {
 
         //temp array to hold the ids of items user favorite
@@ -108,7 +147,7 @@ public class FavoriteActivity extends AppCompatActivity {
     //get the items and compare them with ids list and add them to RV
     private void loadItems(final ArrayList<String> idsList) {
 
-        firestore.collection("Items").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        firestore.collection("Items").orderBy("timePosted", Query.Direction.DESCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 if (queryDocumentSnapshots != null) {
