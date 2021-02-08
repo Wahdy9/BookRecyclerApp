@@ -6,6 +6,7 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
 
+    <!-- For the spinners in AddItemActivity -->
     <string-array name="spinner_category_types">
         <item>Computer</item>
         <item>Art</item>
@@ -16,6 +17,25 @@
     </string-array>
 
     <string-array name="spinner_condition_types">
+        <item>New</item>
+        <item>Used</item>
+        <item>Very used</item>
+        <item>Old</item>
+    </string-array>
+
+    <!-- For the spinners in MainActivity for the filtering -->
+    <string-array name="spinner_category_search">
+        <item>All</item>
+        <item>Computer</item>
+        <item>Art</item>
+        <item>Medicine</item>
+        <item>Business</item>
+        <item>Engineering</item>
+        <item>General</item>
+    </string-array>
+
+    <string-array name="spinner_condition_search">
+        <item>All</item>
         <item>New</item>
         <item>Used</item>
         <item>Very used</item>

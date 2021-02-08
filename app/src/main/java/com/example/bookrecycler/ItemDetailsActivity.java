@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,6 +47,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
     private TextView titleTV, usernameTV, priceTV, conditionTV, categoryTV, descritionTV;
     private EditText commentET;
     private Button sendCommentBtn;
+    private LinearLayout chatLL;
 
     //comment recyclerView
     private RecyclerView commentRV;
@@ -91,6 +93,8 @@ public class ItemDetailsActivity extends AppCompatActivity {
         commentET = findViewById(R.id.item_details_comment_et);
         sendCommentBtn = findViewById(R.id.item_details_comment_btn);
         favoriteIV = findViewById(R.id.item_details_favorite);
+        chatLL = findViewById(R.id.item_details_chat_ll);
+
 
         initializeCommentRV();
 
@@ -172,6 +176,25 @@ public class ItemDetailsActivity extends AppCompatActivity {
                     Toast.makeText(ItemDetailsActivity.this, "You need to login first", Toast.LENGTH_SHORT).show();
                     Intent loginIntent = new Intent(ItemDetailsActivity.this, LoginAndRegisterActivity.class);
                     startActivity(loginIntent);
+                }
+            }
+        });
+
+        //when clicking on chat, send him to MessageActivity to start chatting
+        chatLL.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mAuth.getCurrentUser() != null) {
+                    //this (if) is to prevent user to chat with himself
+                    if(!mAuth.getCurrentUser().getUid().equals(item.userId)) {
+                        Intent intent = new Intent(ItemDetailsActivity.this, MessageActivity.class);
+                        intent.putExtra("userId", item.userId);
+                        startActivity(intent);
+                    }
+                }else{
+                    Toast.makeText(ItemDetailsActivity.this, "You need to login..", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(ItemDetailsActivity.this, LoginAndRegisterActivity.class);
+                    startActivity(intent);
                 }
             }
         });

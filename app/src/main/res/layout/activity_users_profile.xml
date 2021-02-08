@@ -131,13 +131,14 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/userProfile_rv"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            tools:listitem="@layout/item_userprofile"
+            android:layout_height="0dp"
             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-            app:spanCount="3"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageView6" />
+            app:layout_constraintTop_toBottomOf="@+id/imageView6"
+            app:spanCount="3"
+            tools:listitem="@layout/item_userprofile" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

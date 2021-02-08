@@ -83,7 +83,7 @@ public class UsersProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(mAuth.getCurrentUser() != null) {
-                    //this if is to prevent user to chat with himself
+                    //this (if) is to prevent user to chat with himself
                     if(!mAuth.getCurrentUser().getUid().equals(userId)) {
                         Intent intent = new Intent(UsersProfileActivity.this, MessageActivity.class);
                         intent.putExtra("userId", userId);

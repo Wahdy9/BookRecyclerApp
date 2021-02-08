@@ -61,6 +61,8 @@ public class MyProfileActivity extends AppCompatActivity {
 
     private String downloadUrl = "default";
 
+    private ProgressDialog pd;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,6 +89,7 @@ public class MyProfileActivity extends AppCompatActivity {
         saveBtn = findViewById(R.id.profile_save_btn);
         phoneSwitch = findViewById(R.id.profile_phone_switch);
         emailSwitch = findViewById(R.id.profile_email_switch);
+        pd = new ProgressDialog(MyProfileActivity.this);
 
         //initialize firebase
         mAuth = FirebaseAuth.getInstance();
@@ -94,7 +97,6 @@ public class MyProfileActivity extends AppCompatActivity {
         mStorageRef = FirebaseStorage.getInstance().getReference();
 
         //load data from firestore
-        final ProgressDialog pd = new ProgressDialog(this);
         pd.setMessage("Loading");
         pd.show();
         firestore.collection("Users").document(mAuth.getUid()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -162,11 +164,18 @@ public class MyProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                //get data
                 String name = usernameET.getText().toString().trim();
                 String phone = phoneET.getText().toString().trim();
                 String major = majorET.getText().toString().trim();
 
+                //Progress dialog
+                pd.setMessage("Uploading");
+                pd.show();
+
+                //check if values are empty
                 if(!TextUtils.isEmpty(name)  && !TextUtils.isEmpty(phone)){
+                    //create user map
                     final Map<String, Object> userMap = new HashMap<>();
                     userMap.put("id", mAuth.getCurrentUser().getUid());
                     userMap.put("name" , name);
@@ -187,11 +196,11 @@ public class MyProfileActivity extends AppCompatActivity {
                                     .compressToBitmap(imgFile);
                             ByteArrayOutputStream baos = new ByteArrayOutputStream();
                             compressedImg.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                            byte[] thumbData = baos.toByteArray();
+                            byte[] imgBytes = baos.toByteArray();
 
                             //upload to storage
                             final StorageReference imgStoragePath = mStorageRef.child("Profile Images").child(mAuth.getCurrentUser().getUid());
-                            imgStoragePath.putBytes(thumbData).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                            imgStoragePath.putBytes(imgBytes).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                                 @Override
                                 public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                                     if(task.isSuccessful()){
@@ -206,12 +215,14 @@ public class MyProfileActivity extends AppCompatActivity {
                                         });
 
                                     }else{
+                                        pd.dismiss();
                                         Toast.makeText(MyProfileActivity.this, "STORAGE ERROR: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                                     }
                                 }
                             });
                         } catch (IOException e) {
                             //compress image exception
+                            pd.dismiss();
                             Toast.makeText(MyProfileActivity.this, "error:" + e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
 
@@ -222,6 +233,9 @@ public class MyProfileActivity extends AppCompatActivity {
                         uploadToFirestore(userMap);
                     }
 
+                }else{
+                    pd.dismiss();
+                    Toast.makeText(MyProfileActivity.this, "Name & phone must be filled", Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -230,7 +244,7 @@ public class MyProfileActivity extends AppCompatActivity {
     }
 
     private void uploadToFirestore(Map userMap){
-        //upload everything ti firestore
+        //upload everything to firestore
         firestore.collection("Users").document(mAuth.getUid()).set(userMap).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -240,6 +254,7 @@ public class MyProfileActivity extends AppCompatActivity {
                 }else{
                     Toast.makeText(MyProfileActivity.this, "FIRESTROE ERROR: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                 }
+                pd.dismiss();
             }
         });
     }
@@ -263,6 +278,7 @@ public class MyProfileActivity extends AppCompatActivity {
         }
     }
 
+    //pick image from gallery or camera
     private void pickImage() {
         CropImage.activity()
                 .setGuidelines(CropImageView.Guidelines.ON)
