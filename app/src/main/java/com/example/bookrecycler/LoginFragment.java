@@ -287,6 +287,11 @@ public class LoginFragment extends Fragment {
                             String email = "" + user.getEmail();
                             String phone = "" + user.getPhoneNumber();
                             String name = "" + user.getDisplayName();
+                            //if phone is null, set it empty
+                            if(phone.equalsIgnoreCase("null")){
+                                phone = "";
+                            }
+
                             //create user map
                             Map<String, Object> userMap = new HashMap<>();
                             userMap.put("id", uid);
