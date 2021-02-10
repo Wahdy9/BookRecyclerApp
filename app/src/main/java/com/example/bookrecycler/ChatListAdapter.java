@@ -61,6 +61,20 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
             Glide.with(mContext).load(user.getImg_url()).into(holder.profile_image);
         }
 
+        //query to check if there is new msgs, if so show the badge
+        firestore.collection("Chatlist").document(mAuth.getUid()).collection("Contacted").document(user.getId()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if(documentSnapshot != null){
+                    if(documentSnapshot.getBoolean("newMsgs") != null &&  documentSnapshot.getBoolean("newMsgs")){
+                        holder.newMsgsBadge.setVisibility(View.VISIBLE);
+                    }else{
+                        holder.newMsgsBadge.setVisibility(View.GONE);
+                    }
+                }
+            }
+        });
+
         //when click on item go to message activity
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -85,14 +99,14 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
 
         public TextView username;
         public ImageView profile_image;
-        public CircleImageView newMsgsBadge;
+        public TextView newMsgsBadge;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
             username = itemView.findViewById(R.id.user_username);
             profile_image = itemView.findViewById(R.id.user_profile_image);
-            newMsgsBadge = itemView.findViewById(R.id.user_newmgs_iv);
+            newMsgsBadge = itemView.findViewById(R.id.user_newmgs_tv);
 
         }
     }
