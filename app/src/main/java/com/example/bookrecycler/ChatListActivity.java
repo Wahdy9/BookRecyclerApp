@@ -37,7 +37,7 @@ public class ChatListActivity extends AppCompatActivity {
     private FirebaseFirestore firestore;
 
     private List<UserModel> mUsers;//list of users obj in DB that we chatted with,, we get them from Users
-    private List<ChatListModel> usersList;//hold usersID's that we chatted with,, we get them from Chatlist
+    private List<String> myContactsIds;//list of user Ids that we chatted with,, we get them from Chatlists
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,8 +91,7 @@ public class ChatListActivity extends AppCompatActivity {
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 if(queryDocumentSnapshots != null){
                     for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
-                        ChatListModel chatlist= doc.toObject(ChatListModel.class);
-                        usersList.add(chatlist);
+                        myContactsIds.add(doc.getId());
                     }
                     loadChatList();
                 }
@@ -102,21 +101,16 @@ public class ChatListActivity extends AppCompatActivity {
     }
 
 
-    //method to compare the ID's in Chatlist with all users, and create user obj if we contacted that user
+    //method to create user obj by sending query with IDs in myContactsIds list
     private void loadChatList() {
 
-        firestore.collection("Users").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        firestore.collection("Users").whereIn("id", myContactsIds).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 if(queryDocumentSnapshots != null){
                     for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
                         UserModel user= doc.toObject(UserModel.class);
-                        for (ChatListModel chatlist : usersList){
-                            if (user.getId().equals(chatlist.getId())){
-                                mUsers.add(user);
-                            }
-                        }
-
+                        mUsers.add(user);
                     }
                     chatsAdapter.notifyDataSetChanged();
                 }
@@ -128,7 +122,7 @@ public class ChatListActivity extends AppCompatActivity {
     private void filter(String text) {
         ArrayList<UserModel> filteredList = new ArrayList<>();
 
-        for (int i = 0; i < usersList.size(); i++) {
+        for (int i = 0; i < mUsers.size(); i++) {
             if (mUsers.get(i).getName().toLowerCase().contains(text.toLowerCase())) {
                 filteredList.add(mUsers.get(i));
             }
@@ -139,7 +133,7 @@ public class ChatListActivity extends AppCompatActivity {
 
     private void initializeRV() {
         mUsers = new ArrayList<>();
-        usersList = new ArrayList<>();
+        myContactsIds =  new ArrayList<>();
 
         chatsRV = findViewById(R.id.chat_list_rv);
         chatsRV.setHasFixedSize(true);

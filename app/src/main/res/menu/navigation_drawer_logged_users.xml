@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item android:title="Account">
         <menu>
@@ -18,7 +19,8 @@
             <item
                 android:id="@+id/nav_log_chats"
                 android:title="Chats"
-                android:icon="@drawable/ic_message" />
+                android:icon="@drawable/ic_message"
+                app:actionLayout="@layout/badge_layout"/>
             <item
                 android:id="@+id/nav_log_logout"
                 android:title="Logout"
