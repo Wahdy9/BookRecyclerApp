@@ -34,6 +34,7 @@ import org.w3c.dom.Comment;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 import javax.annotation.Nullable;
 
@@ -41,7 +42,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
 
 
     //Views
-    private ImageView imageIV;
+    private ImageView imageIV, favoriteIV;
     private TextView titleTV, usernameTV, priceTV, conditionTV, categoryTV, descritionTV;
     private EditText commentET;
     private Button sendCommentBtn;
@@ -89,6 +90,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
         descritionTV = findViewById(R.id.item_details_description);
         commentET = findViewById(R.id.item_details_comment_et);
         sendCommentBtn = findViewById(R.id.item_details_comment_btn);
+        favoriteIV = findViewById(R.id.item_details_favorite);
 
         initializeCommentRV();
 
@@ -143,10 +145,58 @@ public class ItemDetailsActivity extends AppCompatActivity {
         });
 
 
+        //handle clicks of favorite
+        favoriteIV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mAuth.getCurrentUser() != null){
+                    //if user logged, favor or unfavor the item
+                    if ((Integer) favoriteIV.getTag() == R.drawable.ic_favorite_grey) {
+                        //Favor the item, create a document in favorites and change the icon
+                        HashMap<String, Object> map = new HashMap<>();
+                        map.put("itemId", item.getItemId());
+                        firestore.collection("Users").document(mAuth.getUid()).collection("Favorites").document(item.getItemId()).set(map);
+                        favoriteIV.setImageResource(R.drawable.ic_favorite_red);
+                        favoriteIV.setTag(R.drawable.ic_favorite_red);//tag used in (if), to compare the icon
+                        Toast.makeText(ItemDetailsActivity.this, "Item added to favorite", Toast.LENGTH_SHORT).show();
+                    } else {
+                        //unfavor the item, delete a document in favorites and change the icon
+                        firestore.collection("Users").document(mAuth.getUid()).collection("Favorites").document(item.getItemId()).delete();
+                        favoriteIV.setImageResource(R.drawable.ic_favorite_grey);
+                        favoriteIV.setTag(R.drawable.ic_favorite_grey);
+                        Toast.makeText(ItemDetailsActivity.this, "Item removed from favorite", Toast.LENGTH_SHORT).show();
+                    }
+
+                }else{
+                    //if not logged , send to login activity
+                    Toast.makeText(ItemDetailsActivity.this, "You need to login first", Toast.LENGTH_SHORT).show();
+                    Intent loginIntent = new Intent(ItemDetailsActivity.this, LoginAndRegisterActivity.class);
+                    startActivity(loginIntent);
+                }
+            }
+        });
+
+
 
         //get comments from firestore and display it in RV
         loadComments(item.getItemId());
 
+    }
+
+    //run query to check if user favorite the item
+    private void loadFavorite() {
+        firestore.collection("Users").document(mAuth.getUid()).collection("Favorites").document(item.getItemId()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if (documentSnapshot.exists()) {
+                    favoriteIV.setImageResource(R.drawable.ic_favorite_red);
+                    favoriteIV.setTag(R.drawable.ic_favorite_red);//tag used in (if), to compare the icon
+                } else {
+                    favoriteIV.setImageResource(R.drawable.ic_favorite_grey);
+                    favoriteIV.setTag(R.drawable.ic_favorite_grey);
+                }
+            }
+        });
     }
 
     private void sendComment(String itemId) {
@@ -203,5 +253,15 @@ public class ItemDetailsActivity extends AppCompatActivity {
         commentRV.setHasFixedSize(false);
         commentAdapter = new CommentAdapter(commentList);
         commentRV.setAdapter(commentAdapter);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //this method placed in onResume incase if user logged and returned to this activity, it wont crash
+        //if user logged, load if he favor the item
+        if(mAuth.getCurrentUser() != null){
+            loadFavorite();
+        }
     }
 }
