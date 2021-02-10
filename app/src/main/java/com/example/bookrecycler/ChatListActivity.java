@@ -6,7 +6,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
+import android.widget.EditText;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -21,6 +24,10 @@ import java.util.List;
 
 public class ChatListActivity extends AppCompatActivity {
 
+
+    //Views
+    private EditText searchET;
+
     //Recyclerview
     private RecyclerView chatsRV;
     private ChatListAdapter chatsAdapter;
@@ -30,7 +37,7 @@ public class ChatListActivity extends AppCompatActivity {
     private FirebaseFirestore firestore;
 
     private List<UserModel> mUsers;//list of users obj in DB that we chatted with,, we get them from Users
-    private List<ChatListModel> usersList;//hold usersID's that we chatted with,, we get them from Chatlist
+    private List<String> myContactsIds;//list of user Ids that we chatted with,, we get them from Chatlists
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +56,9 @@ public class ChatListActivity extends AppCompatActivity {
             }
         });
 
+        //initialize views
+        searchET = findViewById(R.id.chatlist_search_et);
+
         //initialize recyclerview
         initializeRV();
 
@@ -56,6 +66,24 @@ public class ChatListActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
 
+        //add text listener to filter
+        searchET.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                filter(s.toString());
+
+            }
+        });
 
         //get users we chatted with, display them in RV
         firestore.collection("Chatlist").document(mAuth.getUid()).collection("Contacted").orderBy("timestamp", Query.Direction.ASCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
@@ -63,8 +91,7 @@ public class ChatListActivity extends AppCompatActivity {
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 if(queryDocumentSnapshots != null){
                     for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
-                        ChatListModel chatlist= doc.toObject(ChatListModel.class);
-                        usersList.add(chatlist);
+                        myContactsIds.add(doc.getId());
                     }
                     loadChatList();
                 }
@@ -74,21 +101,16 @@ public class ChatListActivity extends AppCompatActivity {
     }
 
 
-    //method to compare the ID's in Chatlist with all users, and create user obj if we contacted that user
+    //method to create user obj by sending query with IDs in myContactsIds list
     private void loadChatList() {
 
-        firestore.collection("Users").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        firestore.collection("Users").whereIn("id", myContactsIds).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 if(queryDocumentSnapshots != null){
                     for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
                         UserModel user= doc.toObject(UserModel.class);
-                        for (ChatListModel chatlist : usersList){
-                            if (user.getId().equals(chatlist.getId())){
-                                mUsers.add(user);
-                            }
-                        }
-
+                        mUsers.add(user);
                     }
                     chatsAdapter.notifyDataSetChanged();
                 }
@@ -96,9 +118,22 @@ public class ChatListActivity extends AppCompatActivity {
         });
     }
 
+    //this method used to filter RV when typing in search field
+    private void filter(String text) {
+        ArrayList<UserModel> filteredList = new ArrayList<>();
+
+        for (int i = 0; i < mUsers.size(); i++) {
+            if (mUsers.get(i).getName().toLowerCase().contains(text.toLowerCase())) {
+                filteredList.add(mUsers.get(i));
+            }
+        }
+        chatsAdapter = new ChatListAdapter(this, filteredList);
+        chatsRV.setAdapter(chatsAdapter);
+    }
+
     private void initializeRV() {
         mUsers = new ArrayList<>();
-        usersList = new ArrayList<>();
+        myContactsIds =  new ArrayList<>();
 
         chatsRV = findViewById(R.id.chat_list_rv);
         chatsRV.setHasFixedSize(true);

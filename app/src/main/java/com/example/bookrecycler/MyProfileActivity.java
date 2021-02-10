@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -29,6 +30,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -46,20 +48,26 @@ import id.zelory.compressor.Compressor;
 
 public class MyProfileActivity extends AppCompatActivity {
 
+    //Views
     private EditText usernameET, phoneET, emailET,majorET;
     private CircleImageView profileImg;
     private Button saveBtn;
     private Switch phoneSwitch;
     private Switch emailSwitch;
+    private TextView avgRatingTV;
 
+    //Firebase
     private FirebaseAuth mAuth;
     private FirebaseFirestore firestore;
     private StorageReference mStorageRef;
 
-    private boolean isChanged;
-    private Uri mainImgUri;
+    //Profile image variable
+    private boolean isChanged;//to check if user picked a new image
+    private Uri mainImgUri;//uri of the profile image
 
-    private String downloadUrl = "default";
+    private String downloadUrl = "default";//download url of the uploaded image
+
+    private ProgressDialog pd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +95,8 @@ public class MyProfileActivity extends AppCompatActivity {
         saveBtn = findViewById(R.id.profile_save_btn);
         phoneSwitch = findViewById(R.id.profile_phone_switch);
         emailSwitch = findViewById(R.id.profile_email_switch);
+        pd = new ProgressDialog(MyProfileActivity.this);
+        avgRatingTV =  findViewById(R.id.profile_avg_rating_tv);
 
         //initialize firebase
         mAuth = FirebaseAuth.getInstance();
@@ -94,7 +104,6 @@ public class MyProfileActivity extends AppCompatActivity {
         mStorageRef = FirebaseStorage.getInstance().getReference();
 
         //load data from firestore
-        final ProgressDialog pd = new ProgressDialog(this);
         pd.setMessage("Loading");
         pd.show();
         firestore.collection("Users").document(mAuth.getUid()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -135,7 +144,29 @@ public class MyProfileActivity extends AppCompatActivity {
             }
         });
 
-        //ask permissions, then pick img from phone
+        //load the avg rating
+        firestore.collection("Users").document(mAuth.getUid()).collection("Ratings").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                if (queryDocumentSnapshots != null) {
+                    double sum = 0;
+                    for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                        sum = sum + (double)doc.get("stars");
+                    }
+
+                    int noOfRatings = queryDocumentSnapshots.getDocuments().size();
+                    if(noOfRatings==0){
+                        //if there is no rating, make it 0/5
+                        avgRatingTV.setText("0/5");
+                    }else{
+                        //if there is rating, get the avg
+                        avgRatingTV.setText((sum/noOfRatings) + "/5");
+                    }
+                }
+            }
+        });
+
+        //pick image when clicking profile image
         profileImg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -157,16 +188,23 @@ public class MyProfileActivity extends AppCompatActivity {
             }
         });
 
-        //upload updated data
+        //upload updated data, when btn is clicked
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
+                //get data
                 String name = usernameET.getText().toString().trim();
                 String phone = phoneET.getText().toString().trim();
                 String major = majorET.getText().toString().trim();
 
+                //Progress dialog
+                pd.setMessage("Uploading");
+                pd.show();
+
+                //check if values are empty
                 if(!TextUtils.isEmpty(name)  && !TextUtils.isEmpty(phone)){
+                    //create user map
                     final Map<String, Object> userMap = new HashMap<>();
                     userMap.put("id", mAuth.getCurrentUser().getUid());
                     userMap.put("name" , name);
@@ -187,15 +225,15 @@ public class MyProfileActivity extends AppCompatActivity {
                                     .compressToBitmap(imgFile);
                             ByteArrayOutputStream baos = new ByteArrayOutputStream();
                             compressedImg.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                            byte[] thumbData = baos.toByteArray();
+                            byte[] imgBytes = baos.toByteArray();
 
                             //upload to storage
                             final StorageReference imgStoragePath = mStorageRef.child("Profile Images").child(mAuth.getCurrentUser().getUid());
-                            imgStoragePath.putBytes(thumbData).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                            imgStoragePath.putBytes(imgBytes).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                                 @Override
                                 public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                                     if(task.isSuccessful()){
-                                        //get download url
+                                        //image uploaded successfully, get download url
                                         imgStoragePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                             @Override
                                             public void onSuccess(Uri uri) {
@@ -206,12 +244,15 @@ public class MyProfileActivity extends AppCompatActivity {
                                         });
 
                                     }else{
+                                        //image failed to upload
+                                        pd.dismiss();
                                         Toast.makeText(MyProfileActivity.this, "STORAGE ERROR: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                                     }
                                 }
                             });
                         } catch (IOException e) {
                             //compress image exception
+                            pd.dismiss();
                             Toast.makeText(MyProfileActivity.this, "error:" + e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
 
@@ -222,6 +263,9 @@ public class MyProfileActivity extends AppCompatActivity {
                         uploadToFirestore(userMap);
                     }
 
+                }else{
+                    pd.dismiss();
+                    Toast.makeText(MyProfileActivity.this, "Name & phone must be filled", Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -229,8 +273,9 @@ public class MyProfileActivity extends AppCompatActivity {
 
     }
 
+    //method to upload image to firestore
     private void uploadToFirestore(Map userMap){
-        //upload everything ti firestore
+        //upload everything to firestore
         firestore.collection("Users").document(mAuth.getUid()).set(userMap).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -240,12 +285,13 @@ public class MyProfileActivity extends AppCompatActivity {
                 }else{
                     Toast.makeText(MyProfileActivity.this, "FIRESTROE ERROR: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                 }
+                pd.dismiss();
             }
         });
     }
 
 
-
+    //results of picking up image here
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -263,6 +309,7 @@ public class MyProfileActivity extends AppCompatActivity {
         }
     }
 
+    //pick image from gallery or camera
     private void pickImage() {
         CropImage.activity()
                 .setGuidelines(CropImageView.Guidelines.ON)

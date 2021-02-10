@@ -67,6 +67,9 @@ public class MainActivity extends AppCompatActivity {
     private ItemAdapter itemAdapter;
     private ArrayList<ItemModel> itemList;
 
+    //boolean to check for new msgs, so we can show the new msgs badge
+    boolean newMsgs = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,6 +93,9 @@ public class MainActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
         headerView= LayoutInflater.from(this).inflate(R.layout.nav_header, null);
+
+        //this will make icons in drawer display their original color
+        navigationView.setItemIconTintList(null);
 
         //to show the hamburger menu and sync it with the drawer
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,  R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -125,9 +131,11 @@ public class MainActivity extends AppCompatActivity {
                         startActivity(new Intent(MainActivity.this, FavoriteActivity.class));
                         break;
                     case R.id.nav_log_chats:
+                        newMsgs = false;
                         startActivity(new Intent(MainActivity.this, ChatListActivity.class));
                         break;
                     case R.id.nav_log_logout:
+                        newMsgs = false;
                         Toast.makeText(MainActivity.this, "logout from account", Toast.LENGTH_SHORT).show();
                         mAuth.signOut();
                         changesDrawerLayout();
@@ -227,6 +235,7 @@ public class MainActivity extends AppCompatActivity {
                 navigationView.getMenu().clear();
                 navigationView.inflateMenu(R.menu.navigation_drawer_logged_users);
             }
+            setUpBadge();
         }else{
             //load the drawer layout of guest users
             navigationView.removeHeaderView(headerView);
@@ -367,9 +376,13 @@ public class MainActivity extends AppCompatActivity {
         Spinner conditionSpinner = view.findViewById(R.id.bottom_sheet_condition_spinner);
         Button applyBtn = view.findViewById(R.id.bottom_sheet_apply_btn);
 
+        //TODO:Move Constant class to Strings.xml and create the arrays here(DONE)
+        final String[] categories = getResources().getStringArray(R.array.spinner_category_search);
+        final String[] conditions = getResources().getStringArray(R.array.spinner_condition_search);
+
         //create an array adapter using the string array and default spinner layout
-        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,Constants.CATEGORIES);
-        ArrayAdapter<String> conditionAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,Constants.CONDITIONS);
+        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categories);
+        ArrayAdapter<String> conditionAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, conditions);
         //specify the layout ti use when list of choices appears
         categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         conditionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -384,7 +397,7 @@ public class MainActivity extends AppCompatActivity {
         categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedCategory = Constants.CATEGORIES[position];
+                selectedCategory = categories[position];
                 selectedCategoryPosition = position;
             }
 
@@ -396,7 +409,7 @@ public class MainActivity extends AppCompatActivity {
         conditionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedCondition = Constants.CONDITIONS[position];
+                selectedCondition = conditions[position];
                 selectedConditionPosition = position;
             }
 
@@ -420,6 +433,35 @@ public class MainActivity extends AppCompatActivity {
                 bottomSheetDialog.dismiss();
 
                 populateRV();
+            }
+        });
+    }
+
+    //check if there is new msgs by sending query to Chatlist--->newMsgs, if so show badge in chat item
+    private void setUpBadge(){
+        //get the badge
+        final TextView badge = (TextView)navigationView.getMenu().findItem(R.id.nav_log_chats).getActionView();
+        //run query, set visibility of the badge if there is new msgs
+        firestore.collection("Chatlist").document(mAuth.getUid()).collection("Contacted").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                if(queryDocumentSnapshots!=null) {
+                    for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                        if(doc.getBoolean("newMsgs") !=null && doc.getBoolean("newMsgs")){
+                            newMsgs = true;
+                            break;
+                        }
+                    }
+
+                    //if there is new msgs show the badge and change the icon of chats
+                    if(newMsgs){
+                        badge.setVisibility(View.VISIBLE);
+                        navigationView.getMenu().findItem(R.id.nav_log_chats).setIcon(R.drawable.ic_message_red);
+                    }else{
+                        badge.setVisibility(View.GONE);
+                        navigationView.getMenu().findItem(R.id.nav_log_chats).setIcon(R.drawable.ic_message);
+                    }
+                }
             }
         });
     }

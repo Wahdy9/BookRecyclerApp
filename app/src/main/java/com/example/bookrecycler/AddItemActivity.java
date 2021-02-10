@@ -2,7 +2,6 @@ package com.example.bookrecycler;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -10,13 +9,12 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.ProgressDialog;
-import android.content.ContentValues;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -36,13 +34,19 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AddItemActivity extends AppCompatActivity {
+import id.zelory.compressor.Compressor;
 
+public class AddItemActivity extends AppCompatActivity {
 
     //views
     private EditText titleET, descET, priceET;
@@ -54,24 +58,13 @@ public class AddItemActivity extends AppCompatActivity {
     private FirebaseFirestore firestore;
     private FirebaseStorage firebaseStorage;
 
-    //permission arries
-    private String[] cameraPermission;
-    private String[] storagePermission;
-
-    //permission constant
-    public static final int CAMERA_REQUEST_CODE = 100;
-    public static final int STORAGE_REQUEST_CODE = 200;
-    //image pick content
-    public static final int IMAGE_PICK_GALLERY_CODE = 300;
-    public static final int IMAGE_PICK_CAMERY_CODE = 400;
-
     //img picked uri
-    Uri image_uri = null;
+    private Uri image_uri = null;
 
     //boolean to determine if its edit mode or not
-    boolean isEditMode;
+    private boolean isEditMode;
     //item to edit
-    ItemModel itemToEdit;
+    private ItemModel itemToEdit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,9 +97,6 @@ public class AddItemActivity extends AppCompatActivity {
         firestore = FirebaseFirestore.getInstance();
         firebaseStorage = FirebaseStorage.getInstance();
 
-        //init permission arraies
-        cameraPermission = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        storagePermission = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
         //check if its edit mode
         isEditMode = getIntent().getBooleanExtra("edit_mode", false);
@@ -140,7 +130,19 @@ public class AddItemActivity extends AppCompatActivity {
         addImgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showImagePickDialog();
+                //*if user running +marshmello, permission is required!
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+                    //check if permission is not granted, if so ask for it, otherwise start cropping img
+                    if(ContextCompat.checkSelfPermission(AddItemActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE )!= PackageManager.PERMISSION_GRANTED){ //no need for write permission, cus we aint writing
+                        //it has request code, so if you want to do something with the result, override onRequestPermissionResult(...)
+                        ActivityCompat.requestPermissions(AddItemActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+                    }else{
+                        // start picker, check the result in onActivityResult(...)
+                        pickImage();
+                    }
+                }else{
+                    pickImage();
+                }
             }
         });
 
@@ -157,6 +159,7 @@ public class AddItemActivity extends AppCompatActivity {
         });
 
     }
+
 
 
     //return the index of a specific category
@@ -198,53 +201,69 @@ public class AddItemActivity extends AppCompatActivity {
             if(!image_uri.toString().equalsIgnoreCase(itemToEdit.getItemImg())){
                 //upload the new image with the same name as prevous to overwrite
 
-                //TODO: Compress image here
+                //TODO: Compress image here(DONE)
+                File imgFile = new File(image_uri.getPath());
+                try {
+                    Bitmap compressedImg = new Compressor(AddItemActivity.this)
+                            .setMaxHeight(400)
+                            .setMaxWidth(400)
+                            .setQuality(65)
+                            .compressToBitmap(imgFile);
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    compressedImg.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                    byte[] imgBytes = baos.toByteArray();
 
-                //upload img to storage
-                final StorageReference imgStorageRef = firebaseStorage.getReference().child("Items Image").child(itemToEdit.getItemId());
-                imgStorageRef.putFile(image_uri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                        if(task.isSuccessful()){
-                            //img uploaded successfully
-                            //get the download uri
-                            imgStorageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                @Override
-                                public void onSuccess(Uri uri) {
+                    //upload img to storage
+                    final StorageReference imgStorageRef = firebaseStorage.getReference().child("Items Image").child(itemToEdit.getItemId());
+                    imgStorageRef.putBytes(imgBytes).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                //img uploaded successfully
+                                //get the download uri
+                                imgStorageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                    @Override
+                                    public void onSuccess(Uri uri) {
 
-                                    //create item map to upload it to firestore
-                                    final Map<String, Object> itemMap = new HashMap<>();
-                                    itemMap.put("title", title);
-                                    itemMap.put("price", price);
-                                    itemMap.put("desc", description);
-                                    itemMap.put("category", categorySpinner.getSelectedItem().toString());
-                                    itemMap.put("condition", conditionSpinner.getSelectedItem().toString());
-                                    itemMap.put("itemImg", uri.toString());
+                                        //create item map to upload it to firestore
+                                        final Map<String, Object> itemMap = new HashMap<>();
+                                        itemMap.put("title", title);
+                                        itemMap.put("price", price);
+                                        itemMap.put("desc", description);
+                                        itemMap.put("category", categorySpinner.getSelectedItem().toString());
+                                        itemMap.put("condition", conditionSpinner.getSelectedItem().toString());
+                                        itemMap.put("itemImg", uri.toString());
 
-                                    //upload to firestroe, update the document
-                                    firestore.collection("Items").document(itemToEdit.getItemId()).update(itemMap).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            if (task.isSuccessful()) {
-                                                Toast.makeText(AddItemActivity.this, "Item updated successfully", Toast.LENGTH_LONG).show();
-                                                finish();
-                                            } else {
-                                                Toast.makeText(AddItemActivity.this, "Firestore error:" + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                        //upload to firestroe, update the document
+                                        firestore.collection("Items").document(itemToEdit.getItemId()).update(itemMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    Toast.makeText(AddItemActivity.this, "Item updated successfully", Toast.LENGTH_LONG).show();
+                                                    finish();
+                                                } else {
+                                                    Toast.makeText(AddItemActivity.this, "Firestore error:" + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                                }
+                                                pd.dismiss();
                                             }
-                                            pd.dismiss();
-                                        }
-                                    });
+                                        });
 
-                                }
-                            });
+                                    }
+                                });
+                            }
                         }
-                    }
-                });
+                    });
+                }catch (IOException e) {
+                    //compress image exception
+                    pd.dismiss();
+                    Toast.makeText(AddItemActivity.this, "error:" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    System.out.println("************"+e);
+                }
 
 
 
             }else{
-                //if user didnt pick a new image, just update the other fields
+                //if user didn't pick a new image, just update the other fields
                 //create item map to upload it to firestore
                 final Map<String, Object> itemMap = new HashMap<>();
                 itemMap.put("title", title);
@@ -294,57 +313,73 @@ public class AddItemActivity extends AppCompatActivity {
                 final DocumentReference itemRef = firestore.collection("Items").document();
                 final String itemId = itemRef.getId();
 
-                //TODO: Compress image here
+                //TODO: Compress image here(DONE)
+                File imgFile = new File(image_uri.getPath());
+                try {
+                    Bitmap compressedImg = new Compressor(AddItemActivity.this)
+                            .setMaxHeight(400)
+                            .setMaxWidth(400)
+                            .setQuality(65)
+                            .compressToBitmap(imgFile);
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    compressedImg.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                    byte[] imgBytes = baos.toByteArray();
 
 
-                //upload img to storage
-                final StorageReference imgStorageRef = firebaseStorage.getReference().child("Items Image").child(itemId);
-                imgStorageRef.putFile(image_uri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            //img uploaded successfully
-                            //get the download uri
-                            imgStorageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                @Override
-                                public void onSuccess(Uri uri) {
+                    //upload img to storage
+                    final StorageReference imgStorageRef = firebaseStorage.getReference().child("Items Image").child(itemId);
+                    imgStorageRef.putBytes(imgBytes).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                //img uploaded successfully
+                                //get the download uri
+                                imgStorageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                    @Override
+                                    public void onSuccess(Uri uri) {
 
-                                    //create item map to upload it to firestore
-                                    final Map<String, Object> itemMap = new HashMap<>();
-                                    itemMap.put("itemId", itemId);
-                                    itemMap.put("userId", FirebaseAuth.getInstance().getUid());
-                                    itemMap.put("title", title);
-                                    itemMap.put("price", price);
-                                    itemMap.put("desc", description);
-                                    itemMap.put("category", categorySpinner.getSelectedItem().toString());
-                                    itemMap.put("condition", conditionSpinner.getSelectedItem().toString());
-                                    itemMap.put("itemImg", uri.toString());
-                                    itemMap.put("timePosted", new Timestamp(new Date()));
+                                        //create item map to upload it to firestore
+                                        final Map<String, Object> itemMap = new HashMap<>();
+                                        itemMap.put("itemId", itemId);
+                                        itemMap.put("userId", FirebaseAuth.getInstance().getUid());
+                                        itemMap.put("title", title);
+                                        itemMap.put("price", price);
+                                        itemMap.put("desc", description);
+                                        itemMap.put("category", categorySpinner.getSelectedItem().toString());
+                                        itemMap.put("condition", conditionSpinner.getSelectedItem().toString());
+                                        itemMap.put("itemImg", uri.toString());
+                                        itemMap.put("timePosted", new Timestamp(new Date()));
 
-                                    //upload to firestroe
-                                    firestore.collection("Items").document(itemId).set(itemMap).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            if (task.isSuccessful()) {
-                                                Toast.makeText(AddItemActivity.this, "Item uploaded successfully", Toast.LENGTH_LONG).show();
-                                                finish();
-                                            } else {
-                                                Toast.makeText(AddItemActivity.this, "Firestore error:" + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                        //upload to firestroe
+                                        firestore.collection("Items").document(itemId).set(itemMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    Toast.makeText(AddItemActivity.this, "Item uploaded successfully", Toast.LENGTH_LONG).show();
+                                                    finish();
+                                                } else {
+                                                    Toast.makeText(AddItemActivity.this, "Firestore error:" + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                                }
+                                                pd.dismiss();
                                             }
-                                            pd.dismiss();
-                                        }
-                                    });
+                                        });
 
-                                }
-                            });
+                                    }
+                                });
 
 
-                        } else {
-                            pd.dismiss();
-                            Toast.makeText(AddItemActivity.this, "Storage Error : " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                            } else {
+                                pd.dismiss();
+                                Toast.makeText(AddItemActivity.this, "Storage Error : " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                            }
                         }
-                    }
-                });
+                    });
+
+                }catch (IOException e) {
+                    //compress image exception
+                    pd.dismiss();
+                    Toast.makeText(AddItemActivity.this, "error:" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
 
             }else{
                 //image is not picked
@@ -356,136 +391,51 @@ public class AddItemActivity extends AppCompatActivity {
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
         }
 
-
-
-
     }
 
 
 
-    //show a dialog to pick the image from gallery or camera
-    private void showImagePickDialog() {
-        //options to display in dialog
-        String[] options = {"Camera", "Gallery"};
-
-        //dialog
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Add Image")
-                .setItems(options, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (which == 0) {
-                            //camera, check if permission granted
-                            if (checkCameraPermission()) {
-                                pickFromCamera();
-                            } else {
-                                requestCameraPermission();
-                            }
-                        } else if(which == 1){
-                            //gallery, check if permission granted
-                            if (checkStoragePermission()) {
-                                pickFromGallery();
-                            } else {
-                                requestStoragePermission();
-                            }
-                        }
-                    }
-                }).show();
+    //Pick an image using cropper
+    private void pickImage() {
+        CropImage.activity()
+                .setGuidelines(CropImageView.Guidelines.ON)
+                .start(AddItemActivity.this);
     }
-
-    //true if permission already granted, false otherwise.
-    boolean checkStoragePermission(){
-        boolean result = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) == (PackageManager.PERMISSION_GRANTED);
-        return result;
-    }
-    //request permission(show popup) --> result in activityPermissionResult
-    private void requestStoragePermission() {
-        ActivityCompat.requestPermissions(this, storagePermission,STORAGE_REQUEST_CODE);
-    }
-    //true if permission already granted, false otherwise.
-    boolean checkCameraPermission(){
-        boolean result = ContextCompat.checkSelfPermission(this,
-                Manifest.permission.CAMERA) == (PackageManager.PERMISSION_GRANTED);
-        boolean result1 =  ContextCompat.checkSelfPermission(this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) == (PackageManager.PERMISSION_GRANTED);
-        return result && result1;
-    }
-    //request permission(show popup) --> result in activityPermissionResult
-    private void requestCameraPermission() {
-        ActivityCompat.requestPermissions(this, cameraPermission,CAMERA_REQUEST_CODE);
-    }
-
-    //pick image from gallery
-    void pickFromGallery() {
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setType("image/*");
-        startActivityForResult(intent, IMAGE_PICK_GALLERY_CODE);
-    }
-
-    //pick image from camera
-    void pickFromCamera() {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(MediaStore.Images.Media.TITLE, "Temp Image Title");
-        contentValues.put(MediaStore.Images.Media.DESCRIPTION, "Temp Image Description");
-
-        image_uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
-
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, image_uri);
-        startActivityForResult(intent, IMAGE_PICK_CAMERY_CODE);
-    }
-
 
 
     //permission results received here
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-
-        switch (requestCode) {
-            case CAMERA_REQUEST_CODE: {
-                if (grantResults.length > 0) {
-                    boolean cameraAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-                    boolean storageAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-                    if (cameraAccepted && storageAccepted) {
-                        pickFromCamera();
-                    } else {
-                        Toast.makeText(this, "Camera permission is required!", Toast.LENGTH_SHORT).show();
-                    }
+        if (requestCode ==1) {
+            if (grantResults.length > 0) {
+                boolean storageAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                if (storageAccepted) {
+                    pickImage();
+                } else {
+                    Toast.makeText(this, "Storage permission is required!", Toast.LENGTH_SHORT).show();
                 }
             }
-            break;
-            case STORAGE_REQUEST_CODE: {
-                if (grantResults.length > 0) {
-                    boolean storageAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-                    if (storageAccepted) {
-                        pickFromGallery();
-                    } else {
-                        Toast.makeText(this, "Storage permission is required!", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-            break;
 
         }
-
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
+
 
     //results of picking an image
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (resultCode == RESULT_OK) {
-            if (requestCode == IMAGE_PICK_GALLERY_CODE) {
-                //get picked imgs
-                image_uri = data.getData();
-                //set to img view
-                addImgBtn.setImageURI(image_uri);
-            } else if (requestCode == IMAGE_PICK_CAMERY_CODE) {
-                addImgBtn.setImageURI(image_uri);
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == RESULT_OK) {
+                image_uri = result.getUri();
+                addImgBtn.setImageURI(image_uri);//set the profile img with img picked.
+
+
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                Toast.makeText(AddItemActivity.this, "error: " + result.getError(), Toast.LENGTH_SHORT).show();
             }
         }
-
-        super.onActivityResult(requestCode, resultCode, data);
     }
 }

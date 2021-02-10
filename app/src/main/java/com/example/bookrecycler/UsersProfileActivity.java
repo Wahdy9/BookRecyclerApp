@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +26,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class UsersProfileActivity extends AppCompatActivity {
 
@@ -32,6 +35,8 @@ public class UsersProfileActivity extends AppCompatActivity {
     private ImageView profileImg;
     private TextView usernameTV, majorTV,itemCountTV;
     private LinearLayout chatLL;
+    private RatingBar ratingBar;
+    private TextView avgRatingTV;
 
     //firebase
     private FirebaseFirestore firestore;
@@ -72,6 +77,8 @@ public class UsersProfileActivity extends AppCompatActivity {
         majorTV = findViewById(R.id.userProfile_major_tv);
         itemCountTV = findViewById(R.id.userProfile_count_tv);
         chatLL = findViewById(R.id.userProfile_chat_ll);
+        ratingBar = findViewById(R.id.userProfile_rating_bar);
+        avgRatingTV =  findViewById(R.id.userProfile_avg_rating_tv);
 
         //inilalize firebase
         mAuth = FirebaseAuth.getInstance();
@@ -83,7 +90,7 @@ public class UsersProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(mAuth.getCurrentUser() != null) {
-                    //this if is to prevent user to chat with himself
+                    //this (if) is to prevent user to chat with himself
                     if(!mAuth.getCurrentUser().getUid().equals(userId)) {
                         Intent intent = new Intent(UsersProfileActivity.this, MessageActivity.class);
                         intent.putExtra("userId", userId);
@@ -97,9 +104,77 @@ public class UsersProfileActivity extends AppCompatActivity {
             }
         });
 
+        setupRating();
+
         loadUserInfo();
     }
 
+    //load and setup the rating
+    private void setupRating() {
+        //get the rate of current logged user and assign it to the rating bar
+        firestore.collection("Users").document(userId).collection("Ratings").document(mAuth.getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if (documentSnapshot.exists()){
+                    double stars = (double)documentSnapshot.get("stars");
+                    ratingBar.setRating((float)stars);
+                }
+            }
+        });
+
+        //get the avg rating
+        loadAverageRating();
+
+        //set the rating, add a listener
+        if(mAuth.getCurrentUser()!= null){
+            //check if profile not belong to the current user
+            if(!mAuth.getUid().equalsIgnoreCase(userId)) {
+                ///Listener called when there is a change in the rating bar
+                ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+                    @Override
+                    public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
+                        //create rating map
+                        Map<String, Object> ratingMap = new HashMap<>();
+                        ratingMap.put("userId", mAuth.getUid());
+                        ratingMap.put("stars", ratingBar.getRating());
+
+                        //upload to firestore
+                        firestore.collection("Users").document(userId).collection("Ratings").document(mAuth.getUid()).set(ratingMap);
+
+                        //refresh the average rating textView
+                        loadAverageRating();
+                    }
+                });
+            }else{
+                //hide the rating, when user enter his profile
+                ratingBar.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    //get the avg rating, assign it to average textview
+    private void loadAverageRating(){
+        firestore.collection("Users").document(userId).collection("Ratings").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                if (queryDocumentSnapshots != null) {
+                    double sum = 0;
+                    for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                        sum = sum + (double)doc.get("stars");
+                    }
+
+                    int noOfRatings = queryDocumentSnapshots.getDocuments().size();
+                    if(noOfRatings==0){
+                        //if there is no rating, make it 0/5
+                        avgRatingTV.setText("0/5");
+                    }else{
+                        //if there is rating, get the avg
+                        avgRatingTV.setText((sum/noOfRatings) + "/5");
+                    }
+                }
+            }
+        });
+    }
 
     //load info from firestore and assign them to views
     private void loadUserInfo() {
