@@ -5,11 +5,13 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,6 +29,8 @@ public class ChatListActivity extends AppCompatActivity {
 
     //Views
     private EditText searchET;
+    private TextView notFoundTV;
+    private ProgressDialog pd;
 
     //Recyclerview
     private RecyclerView chatsRV;
@@ -58,6 +62,7 @@ public class ChatListActivity extends AppCompatActivity {
 
         //initialize views
         searchET = findViewById(R.id.chatlist_search_et);
+        notFoundTV = findViewById(R.id.chatlist_found_tv);
 
         //initialize recyclerview
         initializeRV();
@@ -84,6 +89,11 @@ public class ChatListActivity extends AppCompatActivity {
 
             }
         });
+
+        //show progress dialog
+        pd = new ProgressDialog(this);
+        pd.setMessage("Loading");
+        pd.show();
 
         //get users we chatted with, display them in RV
         firestore.collection("Chatlist").document(mAuth.getUid()).collection("Contacted").orderBy("timestamp", Query.Direction.ASCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
@@ -113,7 +123,15 @@ public class ChatListActivity extends AppCompatActivity {
                         mUsers.add(user);
                     }
                     chatsAdapter.notifyDataSetChanged();
+
+                    //if no item found in the chatlist, show notFoundTV
+                    if(mUsers.size()==0){
+                        notFoundTV.setVisibility(View.VISIBLE);
+                    }else{
+                        notFoundTV.setVisibility(View.GONE);
+                    }
                 }
+                pd.dismiss();
             }
         });
     }

@@ -6,6 +6,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -37,6 +38,7 @@ public class UsersProfileActivity extends AppCompatActivity {
     private LinearLayout chatLL;
     private RatingBar ratingBar;
     private TextView avgRatingTV;
+    private ProgressDialog pd;
 
     //firebase
     private FirebaseFirestore firestore;
@@ -111,45 +113,44 @@ public class UsersProfileActivity extends AppCompatActivity {
 
     //load and setup the rating
     private void setupRating() {
-        //get the rate of current logged user and assign it to the rating bar
-        firestore.collection("Users").document(userId).collection("Ratings").document(mAuth.getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                if (documentSnapshot.exists()){
-                    double stars = (double)documentSnapshot.get("stars");
-                    ratingBar.setRating((float)stars);
+
+        //check if user logged in andprofile not belong to the current user
+        if(mAuth.getCurrentUser()!= null && !mAuth.getUid().equalsIgnoreCase(userId)){
+            //get the rate of current logged user and assign it to the rating bar
+            firestore.collection("Users").document(userId).collection("Ratings").document(mAuth.getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    if (documentSnapshot.exists()){
+                        double stars = (double)documentSnapshot.get("stars");
+                        ratingBar.setRating((float)stars);
+                    }
                 }
-            }
-        });
+            });
+
+            ///Listener called when there is a change in the rating bar
+            ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+                @Override
+                public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
+                    //create rating map
+                    Map<String, Object> ratingMap = new HashMap<>();
+                    ratingMap.put("userId", mAuth.getUid());
+                    ratingMap.put("stars", ratingBar.getRating());
+
+                    //upload to firestore
+                    firestore.collection("Users").document(userId).collection("Ratings").document(mAuth.getUid()).set(ratingMap);
+
+                    //refresh the average rating textView
+                    loadAverageRating();
+                }
+            });
+
+        }else{
+            //hide the rating, when user enter his profile OR Guest enter
+            ratingBar.setVisibility(View.GONE);
+        }
 
         //get the avg rating
         loadAverageRating();
-
-        //set the rating, add a listener
-        if(mAuth.getCurrentUser()!= null){
-            //check if profile not belong to the current user
-            if(!mAuth.getUid().equalsIgnoreCase(userId)) {
-                ///Listener called when there is a change in the rating bar
-                ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
-                    @Override
-                    public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                        //create rating map
-                        Map<String, Object> ratingMap = new HashMap<>();
-                        ratingMap.put("userId", mAuth.getUid());
-                        ratingMap.put("stars", ratingBar.getRating());
-
-                        //upload to firestore
-                        firestore.collection("Users").document(userId).collection("Ratings").document(mAuth.getUid()).set(ratingMap);
-
-                        //refresh the average rating textView
-                        loadAverageRating();
-                    }
-                });
-            }else{
-                //hide the rating, when user enter his profile
-                ratingBar.setVisibility(View.GONE);
-            }
-        }
     }
 
     //get the avg rating, assign it to average textview
@@ -169,7 +170,7 @@ public class UsersProfileActivity extends AppCompatActivity {
                         avgRatingTV.setText("0/5");
                     }else{
                         //if there is rating, get the avg
-                        avgRatingTV.setText((sum/noOfRatings) + "/5");
+                        avgRatingTV.setText(String.format("%.1f", (sum/noOfRatings)) + "/5");
                     }
                 }
             }
@@ -178,6 +179,11 @@ public class UsersProfileActivity extends AppCompatActivity {
 
     //load info from firestore and assign them to views
     private void loadUserInfo() {
+        //show progress dialog
+        pd = new ProgressDialog(this);
+        pd.setMessage("Loading");
+        pd.show();
+
         firestore.collection("Users").document(userId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -237,6 +243,7 @@ public class UsersProfileActivity extends AppCompatActivity {
                     itemCountTV.setText(""+ itemList.size());
                     itemAdapter.notifyDataSetChanged();
                 }
+                pd.dismiss();
 
             }
         });

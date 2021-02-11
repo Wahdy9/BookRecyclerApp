@@ -5,6 +5,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,6 +37,7 @@ public class MyItemsActivity extends AppCompatActivity {
     private TextView notFoundTV;
     private FloatingActionButton Add_item_fab;
     private EditText searchET;
+    private ProgressDialog pd;
 
     //Fireabse
     private FirebaseFirestore firestore;
@@ -134,6 +136,12 @@ public class MyItemsActivity extends AppCompatActivity {
 
     //get items from fireStore, add them to recyclerView.
     private void populateRV() {
+
+        //show progress dialog
+        pd = new ProgressDialog(this);
+        pd.setMessage("Loading");
+        pd.show();
+
         itemList.clear();
         firestore.collection("Items").whereEqualTo("userId", mAuth.getUid()).orderBy("timePosted", Query.Direction.DESCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
@@ -153,6 +161,7 @@ public class MyItemsActivity extends AppCompatActivity {
                         notFoundTV.setVisibility(View.GONE);
                     }
                 }
+                pd.dismiss();
 
             }
         });

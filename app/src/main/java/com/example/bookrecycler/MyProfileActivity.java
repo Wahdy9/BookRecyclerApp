@@ -160,7 +160,7 @@ public class MyProfileActivity extends AppCompatActivity {
                         avgRatingTV.setText("0/5");
                     }else{
                         //if there is rating, get the avg
-                        avgRatingTV.setText((sum/noOfRatings) + "/5");
+                        avgRatingTV.setText(String.format("%.1f", (sum/noOfRatings))+ "/5");
                     }
                 }
             }
