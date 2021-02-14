@@ -281,7 +281,7 @@ public class MyProfileActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()){
                     Toast.makeText(MyProfileActivity.this, "Profile Updated Successfully!", Toast.LENGTH_LONG).show();
-
+                    MainActivity.refreshMainActivity = true;//to refresh the MainActivity
                 }else{
                     Toast.makeText(MyProfileActivity.this, "FIRESTROE ERROR: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                 }

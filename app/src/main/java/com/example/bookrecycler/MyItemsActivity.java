@@ -43,6 +43,9 @@ public class MyItemsActivity extends AppCompatActivity {
     private FirebaseFirestore firestore;
     private FirebaseAuth mAuth;
 
+    //boolean used to refresh the MyItemsActivity when there are changes that affects it in another activity
+    public static boolean refreshMyItemsActivity;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -115,6 +118,8 @@ public class MyItemsActivity extends AppCompatActivity {
             }
         });
 
+        //set to false so it wont refresh when activity created, no point of refreshing
+        refreshMyItemsActivity = false;
 
         initializeRV();
 
@@ -172,5 +177,16 @@ public class MyItemsActivity extends AppCompatActivity {
         itemRV = findViewById(R.id.my_items_rv);
         itemAdapter = new ItemAdapter(itemList);
         itemRV.setAdapter(itemAdapter);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        //if changes happen in another activity, it will refresh the activity
+        if(refreshMyItemsActivity){
+            populateRV();
+            refreshMyItemsActivity = false;
+        }
     }
 }

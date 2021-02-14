@@ -139,6 +139,7 @@ public class LoginFragment extends Fragment {
                     progressBar.setVisibility(View.GONE);
                     getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                     Toast.makeText(getActivity(), "Logged as " + mAuth.getCurrentUser().getEmail(), Toast.LENGTH_SHORT).show();
+                    MainActivity.refreshMainActivity = true;//to refresh the MainActivity
                     getActivity().finish();
                 } else {
                     Toast.makeText(getActivity(), "Error, please try later " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -267,7 +268,6 @@ public class LoginFragment extends Fragment {
             } catch (ApiException e) {
                 // Google Sign In failed, update UI appropriately
                 Toast.makeText(getActivity(), "Signin error" +e.getMessage(), Toast.LENGTH_SHORT).show();
-                System.out.println(e);
             }
         }
     }
@@ -310,6 +310,7 @@ public class LoginFragment extends Fragment {
                                 public void onSuccess(Void aVoid) {
                                     //data uploaded successfully to firestore
                                     Toast.makeText(getActivity(), "Your Account Created Successfully", Toast.LENGTH_LONG).show();
+                                    MainActivity.refreshMainActivity = true;//to refresh the MainActivity
                                     getActivity().finish();
                                 }
                             }).addOnFailureListener(new OnFailureListener() {
@@ -322,6 +323,7 @@ public class LoginFragment extends Fragment {
                         }else{
                             //otherwise, finish the activity
                             Toast.makeText(getActivity(), "Logged as " + mAuth.getCurrentUser().getEmail(), Toast.LENGTH_SHORT).show();
+                            MainActivity.refreshMainActivity = true;//to refresh the MainActivity
                             getActivity().finish();
                         }
 
