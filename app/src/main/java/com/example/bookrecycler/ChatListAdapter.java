@@ -13,12 +13,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -79,7 +83,15 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //hide the badge
                 holder.newMsgsBadge.setVisibility(View.GONE);
+                //set the new message in firestore to false, so it wont show the badge next time
+                Map<String, Object> senderMap = new HashMap<>();
+                senderMap.put("id", user.getId());
+                senderMap.put("newMsgs",false);
+                senderMap.put("timestamp", new Timestamp(new Date()));
+                firestore.collection("Chatlist").document(mAuth.getUid()).collection("Contacted").document(user.getId()).set(senderMap);
+                //start MessageActivity
                 Intent intent = new Intent(mContext, MessageActivity.class);
                 intent.putExtra("userId", user.getId());
                 mContext.startActivity(intent);

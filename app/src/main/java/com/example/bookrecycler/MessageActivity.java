@@ -139,6 +139,16 @@ public class MessageActivity extends AppCompatActivity {
         initializeRV();
 
 
+        //go to UserProfileActivity when clicking the username
+        usernameTV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MessageActivity.this, UsersProfileActivity.class);
+                intent.putExtra("userId", userId);
+                startActivity(intent);
+            }
+        });
+
         //send msg when btn send is clicked
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
