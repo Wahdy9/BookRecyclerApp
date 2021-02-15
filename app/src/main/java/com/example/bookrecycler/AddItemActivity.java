@@ -240,6 +240,8 @@ public class AddItemActivity extends AppCompatActivity {
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
                                                     Toast.makeText(AddItemActivity.this, "Item updated successfully", Toast.LENGTH_LONG).show();
+                                                    MainActivity.refreshMainActivity = true;//to refresh the MainActivity
+                                                    MyItemsActivity.refreshMyItemsActivity = true;//to refresh the MyItemActivity
                                                     finish();
                                                 } else {
                                                     Toast.makeText(AddItemActivity.this, "Firestore error:" + task.getException().getMessage(), Toast.LENGTH_LONG).show();
@@ -257,7 +259,6 @@ public class AddItemActivity extends AppCompatActivity {
                     //compress image exception
                     pd.dismiss();
                     Toast.makeText(AddItemActivity.this, "error:" + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    System.out.println("************"+e);
                 }
 
 
@@ -278,6 +279,8 @@ public class AddItemActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             Toast.makeText(AddItemActivity.this, "Item updated successfully", Toast.LENGTH_LONG).show();
+                            MainActivity.refreshMainActivity = true;//to refresh the MainActivity
+                            MyItemsActivity.refreshMyItemsActivity = true;//to refresh the MyItemActivity
                             finish();
                         } else {
                             Toast.makeText(AddItemActivity.this, "Firestore error:" + task.getException().getMessage(), Toast.LENGTH_LONG).show();
@@ -356,6 +359,8 @@ public class AddItemActivity extends AppCompatActivity {
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
                                                     Toast.makeText(AddItemActivity.this, "Item uploaded successfully", Toast.LENGTH_LONG).show();
+                                                    MainActivity.refreshMainActivity = true;//to refresh the MainActivity
+                                                    MyItemsActivity.refreshMyItemsActivity = true;//to refresh the MyItemActivity
                                                     finish();
                                                 } else {
                                                     Toast.makeText(AddItemActivity.this, "Firestore error:" + task.getException().getMessage(), Toast.LENGTH_LONG).show();

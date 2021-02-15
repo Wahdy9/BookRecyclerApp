@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
@@ -14,7 +13,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,7 +28,6 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -69,6 +66,9 @@ public class MainActivity extends AppCompatActivity {
 
     //boolean to check for new msgs, so we can show the new msgs badge
     boolean newMsgs = false;
+
+    //boolean used to refresh the MainActivity when there are changes that affects it in another activity
+    public static boolean refreshMainActivity = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -210,31 +210,36 @@ public class MainActivity extends AppCompatActivity {
     private void changesDrawerLayout() {
         //check if user logged, if so load the logged drawer layout
         if(mAuth.getCurrentUser() != null){
-            //this (if) to prevent duplicate nav header
-            if(navigationView.getHeaderCount() == 0) {
-                navigationView.addHeaderView(headerView);
-                //get user info and assign it to header views
-                final TextView headerTV = headerView.findViewById(R.id.nav_header_tv);
-                final CircleImageView headerIV = headerView.findViewById(R.id.nav_header_iv);
-                firestore.collection("Users").document(mAuth.getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                    @Override
-                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-                        headerTV.setText(documentSnapshot.getString("name"));
-
-                        String profileImgUrl = documentSnapshot.getString("img_url");
-                        if (!profileImgUrl.equals("default")) {
-                            RequestOptions requestOptions = new RequestOptions();
-                            requestOptions.placeholder(R.drawable.user_profile);
-                            Glide.with(MainActivity.this).setDefaultRequestOptions(requestOptions).load(profileImgUrl).into(headerIV);
-                        }else{
-                            Glide.with(MainActivity.this).load(R.drawable.user_profile).into(headerIV);
-                        }
-                    }
-                });
-                //load the drawer layout of logged user
-                navigationView.getMenu().clear();
-                navigationView.inflateMenu(R.menu.navigation_drawer_logged_users);
+            //this (if) to remove nav header if its already existed
+            if(navigationView.getHeaderCount() != 0) {
+                navigationView.removeHeaderView(headerView);
             }
+            //add nav header
+            navigationView.addHeaderView(headerView);
+            //get user info from DB and assign it to header views
+            final TextView headerNameTV = headerView.findViewById(R.id.nav_header_name_tv);
+            final TextView headerEmailTV = headerView.findViewById(R.id.nav_header_email_tv);
+            final CircleImageView headerIV = headerView.findViewById(R.id.nav_header_iv);
+            firestore.collection("Users").document(mAuth.getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    //assign values to header views
+                    headerNameTV.setText(documentSnapshot.getString("name"));
+                    headerEmailTV.setText(documentSnapshot.getString("email"));
+                    String profileImgUrl = documentSnapshot.getString("img_url");
+                    if (!profileImgUrl.equals("default")) {
+                        RequestOptions requestOptions = new RequestOptions().placeholder(R.drawable.user_profile);
+                        Glide.with(MainActivity.this).setDefaultRequestOptions(requestOptions).load(profileImgUrl).into(headerIV);
+                    }else{
+                        Glide.with(MainActivity.this).load(R.drawable.user_profile).into(headerIV);
+                    }
+                }
+            });
+            //load the drawer layout of logged user
+            navigationView.getMenu().clear();
+            navigationView.inflateMenu(R.menu.navigation_drawer_logged_users);
+
+            //set up the chat badge if there is a new messages
             setUpBadge();
         }else{
             //load the drawer layout of guest users
@@ -482,6 +487,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         changesDrawerLayout();
+
+        //if changes happen in another activity, it will refresh the activity
+        if(refreshMainActivity){
+            refreshActivity();
+            refreshMainActivity = false;
+        }
     }
 
     //Option menu
@@ -498,15 +509,20 @@ public class MainActivity extends AppCompatActivity {
 
         }else if(item.getItemId() == R.id.option_refresh){
             //refresh the activity
-            searchET.clearFocus();
-            searchET.setText("");
-            selectedCategoryPosition = 0;
-            selectedConditionPosition = 0;
-            selectedCategory = "All";
-            selectedCondition = "All";
-            populateRV();
+            refreshActivity();
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    //method to refresh the activity
+    private void refreshActivity(){
+        searchET.clearFocus();
+        searchET.setText("");
+        selectedCategoryPosition = 0;
+        selectedConditionPosition = 0;
+        selectedCategory = "All";
+        selectedCondition = "All";
+        populateRV();
     }
 }
