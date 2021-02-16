@@ -53,4 +53,6 @@ dependencies {
     //for google sign in
     implementation 'com.google.android.gms:play-services-auth:19.0.0'
 
+    //for zooming the image in ItemDetailsActivity
+    implementation 'com.zolad:zoominimageview:1.0.0'
 }

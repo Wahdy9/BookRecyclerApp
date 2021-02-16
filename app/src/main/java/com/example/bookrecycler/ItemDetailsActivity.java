@@ -30,6 +30,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.zolad.zoominimageview.ZoomInImageView;
 
 import org.w3c.dom.Comment;
 
@@ -43,7 +44,8 @@ public class ItemDetailsActivity extends AppCompatActivity {
 
 
     //Views
-    private ImageView imageIV, favoriteIV;
+    private ZoomInImageView imageIV;
+    private ImageView favoriteIV;
     private TextView titleTV, usernameTV, priceTV, conditionTV, categoryTV, descritionTV;
     private EditText commentET;
     private Button sendCommentBtn;

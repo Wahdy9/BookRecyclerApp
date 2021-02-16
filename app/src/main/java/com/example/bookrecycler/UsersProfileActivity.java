@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -35,7 +36,7 @@ public class UsersProfileActivity extends AppCompatActivity {
     //views
     private ImageView profileImg;
     private TextView usernameTV, majorTV,itemCountTV;
-    private LinearLayout chatLL;
+    private LinearLayout chatLL, phoneLL, emailLL;
     private RatingBar ratingBar;
     private TextView avgRatingTV;
     private ProgressDialog pd;
@@ -51,7 +52,7 @@ public class UsersProfileActivity extends AppCompatActivity {
 
     private String userId;//passed from ItemDetailsActivity, used to query that user information
 
-    private String name;//used to set the name of user in the toolbar title
+    private String name, phone,email;//used to set the name of user in the toolbar title
 
 
     @Override
@@ -79,6 +80,8 @@ public class UsersProfileActivity extends AppCompatActivity {
         majorTV = findViewById(R.id.userProfile_major_tv);
         itemCountTV = findViewById(R.id.userProfile_count_tv);
         chatLL = findViewById(R.id.userProfile_chat_ll);
+        phoneLL = findViewById(R.id.userProfile_phone_ll);
+        emailLL = findViewById(R.id.userProfile_email_ll);
         ratingBar = findViewById(R.id.userProfile_rating_bar);
         avgRatingTV =  findViewById(R.id.userProfile_avg_rating_tv);
 
@@ -91,6 +94,7 @@ public class UsersProfileActivity extends AppCompatActivity {
         chatLL.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //check if user logged, if not send to login activity
                 if(mAuth.getCurrentUser() != null) {
                     //this (if) is to prevent user to chat with himself
                     if(!mAuth.getCurrentUser().getUid().equals(userId)) {
@@ -105,6 +109,54 @@ public class UsersProfileActivity extends AppCompatActivity {
                 }
             }
         });
+
+        //when clicking on phone, send him to phone dial
+        phoneLL.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //check if user logged, if not send to login activity
+                if(mAuth.getCurrentUser() != null) {
+                    //send to phone
+                    Intent intent = new Intent(Intent.ACTION_DIAL);
+                    intent.setData(Uri.parse("tel:" + phone));
+                    //to make sure app for this intent exist
+                    if (intent.resolveActivity(getPackageManager()) != null) {
+                        startActivity(intent);
+                    }
+
+                }else{
+                    Toast.makeText(UsersProfileActivity.this, "You need to login..", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(UsersProfileActivity.this, LoginAndRegisterActivity.class);
+                    startActivity(intent);
+                }
+            }
+        });
+
+        //when clicking on email, send him to email app
+        emailLL.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //check if user logged, if not send to login activity
+                if(mAuth.getCurrentUser() != null) {
+                    String [] addresses = {email};//address to send email to
+
+                    //show what email app to open
+                    Intent intent = new Intent(Intent.ACTION_SENDTO);
+                    intent.setData(Uri.parse("mailto:")); // only email apps should handle this
+                    intent.putExtra(Intent.EXTRA_EMAIL, addresses);
+                    //to make sure app for this intent exist, so it won't crash
+                    if (intent.resolveActivity(getPackageManager()) != null) {
+                        startActivity(intent);
+                    }
+
+                }else{
+                    Toast.makeText(UsersProfileActivity.this, "You need to login..", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(UsersProfileActivity.this, LoginAndRegisterActivity.class);
+                    startActivity(intent);
+                }
+            }
+        });
+
 
         setupRating();
 
@@ -195,13 +247,24 @@ public class UsersProfileActivity extends AppCompatActivity {
                 if(task.getResult() != null) {
                     name = task.getResult().getString("name");
                     String major = task.getResult().getString("major");
+                    email = task.getResult().getString("email");
+                    phone = task.getResult().getString("phone");
+                    boolean showEmail = task.getResult().getBoolean("showEmail");
+                    boolean showPhone = task.getResult().getBoolean("showPhone");
                     String profileImgUrl = task.getResult().getString("img_url");
+
                     if (name != null) {
                         usernameTV.setText(name);
                         getSupportActionBar().setTitle(name + " Profile");
                     }
                     if(major!= null) {
                         majorTV.setText(major);
+                    }
+                    if(!showEmail){
+                        emailLL.setVisibility(View.GONE);
+                    }
+                    if(!showPhone){
+                        phoneLL.setVisibility(View.GONE);
                     }
                     if(profileImgUrl != null){
                         //assign image
