@@ -4,12 +4,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,8 +31,11 @@ public class ChatListActivity extends AppCompatActivity {
 
     //Views
     private EditText searchET;
+    private TextView notFoundTV;
+    private ProgressDialog pd;
 
     //Recyclerview
+    private SwipeRefreshLayout refreshLayout;
     private RecyclerView chatsRV;
     private ChatListAdapter chatsAdapter;
 
@@ -57,7 +64,9 @@ public class ChatListActivity extends AppCompatActivity {
         });
 
         //initialize views
+        refreshLayout = findViewById(R.id.chatlist_refresh_layout);
         searchET = findViewById(R.id.chatlist_search_et);
+        notFoundTV = findViewById(R.id.chatlist_found_tv);
 
         //initialize recyclerview
         initializeRV();
@@ -65,6 +74,22 @@ public class ChatListActivity extends AppCompatActivity {
         //initialize firebase
         mAuth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
+
+        //setup refresh layout
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        //stop refreshing
+                        refreshLayout.setRefreshing(false);
+                        //repopulate recycler view
+                        getMyUsers();
+                    }
+                }, 3000);
+            }
+        });
 
         //add text listener to filter
         searchET.addTextChangedListener(new TextWatcher() {
@@ -85,7 +110,18 @@ public class ChatListActivity extends AppCompatActivity {
             }
         });
 
-        //get users we chatted with, display them in RV
+        //show progress dialog
+        pd = new ProgressDialog(this);
+        pd.setMessage("Loading");
+        pd.show();
+
+
+        getMyUsers();
+    }
+
+    //get users we chatted with, display them in RV
+    private void getMyUsers(){
+        myContactsIds.clear();
         firestore.collection("Chatlist").document(mAuth.getUid()).collection("Contacted").orderBy("timestamp", Query.Direction.ASCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
@@ -97,13 +133,12 @@ public class ChatListActivity extends AppCompatActivity {
                 }
             }
         });
-
     }
 
 
     //method to create user obj by sending query with IDs in myContactsIds list
     private void loadChatList() {
-
+        mUsers.clear();
         firestore.collection("Users").whereIn("id", myContactsIds).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
@@ -113,7 +148,15 @@ public class ChatListActivity extends AppCompatActivity {
                         mUsers.add(user);
                     }
                     chatsAdapter.notifyDataSetChanged();
+
+                    //if no item found in the chatlist, show notFoundTV
+                    if(mUsers.size()==0){
+                        notFoundTV.setVisibility(View.VISIBLE);
+                    }else{
+                        notFoundTV.setVisibility(View.GONE);
+                    }
                 }
+                pd.dismiss();
             }
         });
     }

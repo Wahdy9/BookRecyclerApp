@@ -6,8 +6,8 @@
     app:cardBackgroundColor="@android:color/white"
     app:cardUseCompatPadding="true"
     app:contentPadding="5dp"
-    android:layout_marginLeft="8dp"
-    android:layout_marginRight="8dp">
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp">
 
     <RelativeLayout
         android:layout_width="match_parent"

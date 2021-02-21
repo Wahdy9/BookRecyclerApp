@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -34,6 +35,7 @@ public class FavoriteActivity extends AppCompatActivity {
     private SwipeRefreshLayout refreshLayout;
     private TextView notFoundTV;
     private EditText searchET;
+    private ProgressDialog pd;
 
     //Fireabse
     private FirebaseFirestore firestore;
@@ -122,6 +124,11 @@ public class FavoriteActivity extends AppCompatActivity {
     //get items ids from Favorites, and call loadItems.
     private void populateRV() {
 
+        //show progress dialog
+        pd = new ProgressDialog(this);
+        pd.setMessage("Loading");
+        pd.show();
+
         //temp array to hold the ids of items user favorite
         final ArrayList<String> favoritePostIdsList = new ArrayList<>();
 
@@ -167,6 +174,7 @@ public class FavoriteActivity extends AppCompatActivity {
                         notFoundTV.setVisibility(View.GONE);
                     }
                 }
+                pd.dismiss();
             }
         });
     }
