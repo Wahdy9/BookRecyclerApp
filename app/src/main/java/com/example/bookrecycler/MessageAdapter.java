@@ -1,6 +1,7 @@
 package com.example.bookrecycler;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.view.LayoutInflater;
@@ -11,11 +12,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder>{
@@ -30,10 +35,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
 
     FirebaseUser fuser;
+    FirebaseFirestore firestore;
 
     public MessageAdapter(Context mContext, List<MessageModel> msgList){
         this.msgList = msgList;
         this.mContext = mContext;
+        firestore = FirebaseFirestore.getInstance();
     }
 
     @Override
@@ -63,15 +70,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
 
     @Override
-    public void onBindViewHolder(@NonNull MessageAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull MessageAdapter.ViewHolder holder, final int position) {
 
+        //get the msg
         final MessageModel msg = msgList.get(position);
 
-        System.out.println("*****************MsgAdapter- isMap = " +msg.isMap());
-
+        //check if msg is a map, image or normal text
         if(msg.isMap()) {
             //if the msg is a location
-            System.out.println("*****************MsgAdapter-inside is a map-  latitude= " + msg.getGeoPoint().getLatitude() +"Longtitude= " + msg.getGeoPoint().getLongitude());
             //set and show image and text "My Location"
             holder.show_message.setText("My Location");
             holder.myLocationIV.setVisibility(View.VISIBLE);
@@ -101,13 +107,59 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
         }else{
             //if msg is just a text
-            System.out.println("*****************MsgAdapter-inside is a else-  latitude= " + msg.getGeoPoint().getLatitude() +"Longtitude= " + msg.getGeoPoint().getLongitude());
-
             holder.show_message.setText(msg.getMessage());
             holder.myLocationIV.setVisibility(View.GONE);
         }
 
+        //show alert dialog for deleting msg when click on it
+        if(fuser.getUid().equals(msg.getSender())) {
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //show alert dialog
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                    builder.setTitle("Delete");
+                    builder.setMessage("Are you sure you want to delete this message?");
+                    builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            deleteMessage(msg.getId());
+                        }
+                    });
+                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+                    builder.create().show();
+                }
+            });
+        }
 
+    }
+
+    //Delete the msg
+    private void deleteMessage( final String msgId) {
+        //create updated msg
+        HashMap<String, Object> updatedMsgMap = new HashMap<>();
+        updatedMsgMap.put("map", false);
+        updatedMsgMap.put("image", false);
+        updatedMsgMap.put("message", "This message was deleted");
+
+        //update the document in firestore
+        firestore.collection("Chats").document(msgId).update(updatedMsgMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+
+                //refresh MessageActivity by removing and reAdding the snapshot listener
+                if (mContext instanceof MessageActivity) {
+                    ((MessageActivity)mContext).registration.remove();
+                    ((MessageActivity)mContext).readMessages();
+                }
+
+            }
+        });
     }
 
     @Override

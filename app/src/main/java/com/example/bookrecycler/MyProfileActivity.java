@@ -204,6 +204,13 @@ public class MyProfileActivity extends AppCompatActivity {
 
                 //check if values are empty
                 if(!TextUtils.isEmpty(name)  && !TextUtils.isEmpty(phone)){
+                    //check if username is not more than 15 character
+                    if(name.length() >15){
+                        Toast.makeText(MyProfileActivity.this, "Name must not exceed 15 charcters", Toast.LENGTH_SHORT).show();
+                        pd.dismiss();
+                        return;
+                    }
+
                     //create user map
                     final Map<String, Object> userMap = new HashMap<>();
                     userMap.put("id", mAuth.getCurrentUser().getUid());
