@@ -23,7 +23,6 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:visibility="gone"
-        android:src="@drawable/my_location_icon"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
