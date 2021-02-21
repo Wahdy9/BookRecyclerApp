@@ -6,6 +6,7 @@ import java.util.Date;
 
 public class MessageModel {
 
+    private String id;
     private String sender;
     private String receiver;
     private String imageUrl;
@@ -18,7 +19,8 @@ public class MessageModel {
     public MessageModel() {
     }
 
-    public MessageModel(String sender, String receiver, String imageUrl, boolean map, boolean image, String message, Date timestamp, GeoPoint geoPoint) {
+    public MessageModel(String id,String sender, String receiver, String imageUrl, boolean map, boolean image, String message, Date timestamp, GeoPoint geoPoint) {
+        this.id = id;
         this.sender = sender;
         this.receiver = receiver;
         this.imageUrl = imageUrl;
@@ -27,6 +29,14 @@ public class MessageModel {
         this.message = message;
         this.timestamp = timestamp;
         this.geoPoint = geoPoint;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getSender() {

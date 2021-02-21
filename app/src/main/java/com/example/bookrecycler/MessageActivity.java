@@ -36,12 +36,14 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.auth.User;
@@ -68,6 +70,7 @@ public class MessageActivity extends AppCompatActivity {
     //firebase
     private FirebaseAuth mAuth;
     private FirebaseFirestore firestore;
+    public ListenerRegistration registration;//for firestore snapshat listner, so we can deattatch it from adapter to refresh RV
 
     //received from previous activity, used to load info of that user + msgs
     String userId;
@@ -233,7 +236,14 @@ public class MessageActivity extends AppCompatActivity {
 
     //upload the location to firestore and add entries in chatList if not exist
     private void sendLocation(String sender, String receiver,double latitude, double longitude) {
+
+        //generate random id for the msg
+        final DocumentReference msgRef = firestore.collection("Chats").document();
+        final String msgId = msgRef.getId();
+
+        //create msg map
         HashMap<String, Object> msgMap = new HashMap<>();
+        msgMap.put("id", msgId);
         msgMap.put("sender", sender);
         msgMap.put("receiver", receiver);
         msgMap.put("imageUrl", "");
@@ -244,7 +254,7 @@ public class MessageActivity extends AppCompatActivity {
         msgMap.put("geoPoint", new GeoPoint(latitude,longitude));
 
         //upload to firestore to Chats
-        firestore.collection("Chats").document().set(msgMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+        firestore.collection("Chats").document(msgId).set(msgMap).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 pd.dismiss();
@@ -293,7 +303,13 @@ public class MessageActivity extends AppCompatActivity {
     //upload the msg to firestore and add entries in chatList if not exist
     private void sendMessage(String sender, String receiver, String message) {
 
+        //generate random id for the msg
+        final DocumentReference msgRef = firestore.collection("Chats").document();
+        final String msgId = msgRef.getId();
+
+        //create msg map
         HashMap<String, Object> msgMap = new HashMap<>();
+        msgMap.put("id", msgId);
         msgMap.put("sender", sender);
         msgMap.put("receiver", receiver);
         msgMap.put("imageUrl", "");
@@ -304,7 +320,7 @@ public class MessageActivity extends AppCompatActivity {
         msgMap.put("geoPoint", new GeoPoint(0,0));
 
         //upload to firestore to Chats
-        firestore.collection("Chats").document().set(msgMap);
+        firestore.collection("Chats").document(msgId).set(msgMap);
 
         //upload info about sender and reciever to DB-> Chatlist, so these users will aprear in chatListActivity
         Map<String, Object> senderMap = new HashMap<>();
@@ -321,24 +337,27 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     //load msgs from firestore
-    private void readMessages() {
+    public void readMessages() {
 
         msgList.clear();
 
-        firestore.collection("Chats").orderBy("timestamp", Query.Direction.ASCENDING).addSnapshotListener(this, new EventListener<QuerySnapshot>() {
+        //snapshot listener to get the messages
+        Query query = firestore.collection("Chats").orderBy("timestamp", Query.Direction.ASCENDING);
+        registration = query.addSnapshotListener(this, new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
                 if (queryDocumentSnapshots != null) {
                     for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
                         if (doc.getType() == DocumentChange.Type.ADDED) {
                             MessageModel msg = doc.getDocument().toObject(MessageModel.class);
+                            //check if msg belong the two users
                             if (msg.getReceiver().equals(mAuth.getUid()) && msg.getSender().equals(userId) ||
                                     msg.getReceiver().equals(userId) && msg.getSender().equals(mAuth.getUid())){
                                 msgList.add(msg);
                             }
                         }
+
                     }
-                    //msgAdapter.notifyDataSetChanged();//change it if scrolling didnt work
                     msgAdapter = new MessageAdapter(MessageActivity.this, msgList);
                     msgRV.setAdapter(msgAdapter);
                 }
