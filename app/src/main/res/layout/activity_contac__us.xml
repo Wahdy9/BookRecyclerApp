@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Contac_Us">
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/Base.ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:popupTheme="@style/MenuStyle" />
+
+    <TextView
+        android:id="@+id/about_usTV"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Meet Our Team Members"
+        android:textAlignment="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="30dp"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"/>
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="@android:color/white"
+        app:cardCornerRadius="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/about_usTV"
+        app:cardElevation="3dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="15dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            >
+
+            <ImageView
+                android:id="@+id/imgLB"
+                android:layout_width="100dp"
+                android:layout_height="120dp"
+                app:layout_constraintCircleRadius="5dp"
+                android:layout_marginLeft="10dp"
+                android:scaleType="centerCrop"
+                android:background="@drawable/book_recycler_logo"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/titleLB"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="4dp"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-condensed"
+                android:maxLines="1"
+                android:text="Muhammad Khamis Dauda"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                app:layout_constraintEnd_toStartOf="@+id/moreLB"
+                app:layout_constraintStart_toEndOf="@+id/imgLB"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/linked_in"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_linkedin"
+                app:layout_constraintTop_toBottomOf="@id/titleLB"
+                app:layout_constraintLeft_toRightOf="@id/imgLB"
+                android:layout_marginTop="15dp"
+                />
+            <TextView
+                android:id="@+id/linkin_TV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintLeft_toRightOf="@id/linked_in"
+                app:layout_constraintTop_toBottomOf="@id/titleLB"
+                android:layout_marginTop="15dp"
+                android:text="my linked In handle"
+                android:layout_marginLeft="10dp"
+                />
+            <ImageView
+                android:id="@+id/emai_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintLeft_toRightOf="@id/imgLB"
+                app:layout_constraintTop_toBottomOf="@id/linked_in"
+                android:layout_marginTop="10dp"
+                android:src="@drawable/ic_sharp_email_24"
+                />
+            <TextView
+                android:id="@+id/email_TV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintLeft_toRightOf="@id/emai_view"
+                app:layout_constraintTop_toBottomOf="@id/linkin_TV"
+                android:text="Your email Address"
+                android:layout_marginTop="15dp"
+                android:layout_marginLeft="10dp"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="@android:color/white"
+        app:cardCornerRadius="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/card1"
+        app:cardElevation="3dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="15dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            >
+
+            <ImageView
+                android:id="@+id/imgLB2"
+                android:layout_width="100dp"
+                android:layout_height="120dp"
+                app:layout_constraintCircleRadius="5dp"
+                android:layout_marginLeft="10dp"
+                android:scaleType="centerCrop"
+                android:background="@drawable/book_recycler_logo"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/titleLB2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="4dp"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-condensed"
+                android:maxLines="1"
+                android:text="Khalid Wahedy"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                app:layout_constraintEnd_toStartOf="@+id/moreLB"
+                app:layout_constraintStart_toEndOf="@+id/imgLB2"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/linked_in2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_linkedin"
+                app:layout_constraintTop_toBottomOf="@id/titleLB2"
+                app:layout_constraintLeft_toRightOf="@id/imgLB2"
+                android:layout_marginTop="15dp"
+                />
+            <TextView
+                android:id="@+id/linkin_TV2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintLeft_toRightOf="@id/linked_in2"
+                app:layout_constraintTop_toBottomOf="@id/titleLB2"
+                android:layout_marginTop="15dp"
+                android:text="my linked In handle"
+                android:layout_marginLeft="10dp"
+                />
+            <ImageView
+                android:id="@+id/emai_view2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintLeft_toRightOf="@id/imgLB2"
+                app:layout_constraintTop_toBottomOf="@id/linked_in2"
+                android:layout_marginTop="10dp"
+                android:src="@drawable/ic_sharp_email_24"
+                />
+            <TextView
+                android:id="@+id/email_TV2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintLeft_toRightOf="@id/emai_view2"
+                app:layout_constraintTop_toBottomOf="@id/linkin_TV2"
+                android:text="Your email Address"
+                android:layout_marginTop="15dp"
+                android:layout_marginLeft="10dp"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+</androidx.constraintlayout.widget.ConstraintLayout>

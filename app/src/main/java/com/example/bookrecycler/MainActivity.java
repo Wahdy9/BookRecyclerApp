@@ -114,11 +114,13 @@ public class MainActivity extends AppCompatActivity {
                         startActivity(LoginIntent);
                         break;
                     case R.id.nav_contact:
-                        Toast.makeText(MainActivity.this, "Contact", Toast.LENGTH_SHORT).show();
+                        Intent ContactUs = new Intent(MainActivity.this,Contac_Us.class);
+                        startActivity(ContactUs);
                         break;
 
-                    case R.id.nav_faq:
-                        Toast.makeText(MainActivity.this, "FAQ", Toast.LENGTH_SHORT).show();
+                    case R.id.nav_about_book:
+                        Intent About = new Intent(MainActivity.this,About_Page.class);
+                        startActivity(About);
                         break;
                     ///////////////////////////////////items of logged user layout////////////////////////////////////
                     case R.id.nav_log_profile:

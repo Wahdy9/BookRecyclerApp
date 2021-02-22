@@ -64,7 +64,6 @@
             android:layout_width="16dp"
             android:layout_height="16dp"
             android:layout_marginBottom="4dp"
-            android:tint="#c0c0c0"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/commentCountLB"
             app:srcCompat="@drawable/ic_message" />
@@ -85,7 +84,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="5dp"
             android:layout_marginTop="32dp"
-            android:tint="#c0c0c0"
             app:layout_constraintStart_toEndOf="@+id/imgLB"
             app:layout_constraintTop_toBottomOf="@+id/titleLB"
             app:srcCompat="@drawable/ic_account" />
