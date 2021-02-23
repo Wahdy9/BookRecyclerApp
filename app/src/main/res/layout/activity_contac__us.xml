@@ -48,9 +48,8 @@
 
             <ImageView
                 android:id="@+id/imgLB"
-                android:layout_width="100dp"
-                android:layout_height="120dp"
-                android:layout_marginLeft="10dp"
+                android:layout_width="124dp"
+                android:layout_height="124dp"
                 android:background="@drawable/book_recycler_logo"
                 android:scaleType="centerCrop"
                 app:layout_constraintCircleRadius="5dp"
@@ -61,7 +60,6 @@
                 android:id="@+id/titleLB"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
                 android:layout_marginTop="20dp"
                 android:layout_marginEnd="4dp"
                 android:ellipsize="end"
@@ -87,9 +85,9 @@
                 android:id="@+id/linkin_TV"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="15dp"
-                android:text="my linked In handle"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="18dp"
+                android:text="muhammad-khamis-dauda"
                 app:layout_constraintLeft_toRightOf="@id/linked_in"
                 app:layout_constraintTop_toBottomOf="@id/titleLB" />
 
@@ -106,9 +104,9 @@
                 android:id="@+id/email_TV"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="15dp"
-                android:text="Your email Address"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="16dp"
+                android:text="Muhdkhamis1@gmail.com"
                 app:layout_constraintLeft_toRightOf="@id/emai_view"
                 app:layout_constraintTop_toBottomOf="@id/linkin_TV" />
 
@@ -133,9 +131,8 @@
 
             <ImageView
                 android:id="@+id/imgLB2"
-                android:layout_width="100dp"
-                android:layout_height="120dp"
-                android:layout_marginLeft="10dp"
+                android:layout_width="124dp"
+                android:layout_height="124dp"
                 android:background="@drawable/book_recycler_logo"
                 android:scaleType="centerCrop"
                 app:layout_constraintCircleRadius="5dp"
@@ -146,7 +143,6 @@
                 android:id="@+id/titleLB2"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
                 android:layout_marginTop="20dp"
                 android:layout_marginEnd="4dp"
                 android:ellipsize="end"
@@ -172,9 +168,9 @@
                 android:id="@+id/linkin_TV2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="15dp"
-                android:text="my linked In handle"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="18dp"
+                android:text="khaled-wahdy"
                 app:layout_constraintLeft_toRightOf="@id/linked_in2"
                 app:layout_constraintTop_toBottomOf="@id/titleLB2" />
 
@@ -191,8 +187,8 @@
                 android:id="@+id/email_TV2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="15dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="16dp"
                 android:text="kwahde@stu.kau.edu.sa"
                 app:layout_constraintLeft_toRightOf="@id/emai_view2"
                 app:layout_constraintTop_toBottomOf="@id/linkin_TV2" />

@@ -39,35 +39,35 @@ public class Contac_Us extends AppCompatActivity {
         linked_inKhamis.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(Contac_Us.this, "Link to Khamis LinkedIn", Toast.LENGTH_SHORT).show();
+                sendToLinkedIn("https://www.linkedin.com/in/muhammad-khamis-dauda-a760796b");
             }
         });
 
         email_inKhamis.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendToEmail("kwahde@stu.kau.edu.sa");
+                sendToEmailApp("Muhdkhamis1@gmail.com");
             }
         });
 
         linked_inKhalid.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(Contac_Us.this, "Link to Khalid LinkedIn", Toast.LENGTH_SHORT).show();
+                sendToLinkedIn("https://www.linkedin.com/in/khaled-wahdy-a733891a1");
             }
         });
 
         email_inKhalid.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendToEmail("kwahde@stu.kau.edu.sa");
+                sendToEmailApp("kwahde@stu.kau.edu.sa");
             }
         });
 
     }
 
     //send to email app with the address
-    private void sendToEmail(String email){
+    private void sendToEmailApp(String email){
         String [] addresses = {email};//address to send email to
 
         //show what email app to open
@@ -78,5 +78,11 @@ public class Contac_Us extends AppCompatActivity {
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivity(intent);
         }
+    }
+
+    //send to linked in or open the browser if app doesn't exist
+    private void sendToLinkedIn(String link){
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+        startActivity(browserIntent);
     }
 }

@@ -29,9 +29,9 @@
     </item>
     <item
         android:id="@+id/nav_contact"
-        android:title="Contact" />
+        android:title="Contact us" />
     <item
         android:id="@+id/nav_about_book"
-        android:title="About the Project"/>
+        android:title="About"/>
 
 </menu>

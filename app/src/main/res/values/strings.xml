@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Book Recycler</string>
 
-    <string name="contact_us">Contact Us</string>
+    <string name="contact_us">Contact us</string>
     <string name="about">About</string>
 
     <!-- Required by navigation drawer toggle button -->
@@ -14,7 +14,8 @@
         <item>Computer</item>
         <item>Islamic</item>
         <item>Sciences</item>
-        <item>Art and Humanity</item>
+        <item>Art</item>
+        <item>language</item>
         <item>Medicine</item>
         <item>Business</item>
         <item>Engineering</item>
@@ -35,7 +36,8 @@
         <item>Computer</item>
         <item>Islamic</item>
         <item>Sciences</item>
-        <item>Art and Humanity</item>
+        <item>Art</item>
+        <item>language</item>
         <item>Medicine</item>
         <item>Business</item>
         <item>Engineering</item>
@@ -61,11 +63,11 @@
 
     </string>
 
-    <string name="libility">
+    <string name="liability">
         <p>
             Be aware of and protect yourself against fraud, scams, phishing and all sort of physical attacks
             We are not liable to any unethical use, physical or social issues that may arises while using this app.
-            Always share and meet in a public places or security cameras while delivaring/collecting item.
+            Always share and meet in a public places or security cameras while delivering/collecting item.
         </p>
     </string>
 </resources>
