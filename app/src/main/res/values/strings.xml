@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">Book Recycler</string>
 
+    <string name="contact_us">Contact Us</string>
+    <string name="about">About</string>
+
     <!-- Required by navigation drawer toggle button -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -9,17 +12,20 @@
     <!-- For the spinners in AddItemActivity -->
     <string-array name="spinner_category_types">
         <item>Computer</item>
-        <item>Art</item>
+        <item>Islamic</item>
+        <item>Sciences</item>
+        <item>Art and Humanity</item>
         <item>Medicine</item>
         <item>Business</item>
         <item>Engineering</item>
+        <item>Communication</item>
         <item>General</item>
+        <item>Others</item>
     </string-array>
 
     <string-array name="spinner_condition_types">
         <item>New</item>
         <item>Used</item>
-        <item>Very used</item>
         <item>Old</item>
     </string-array>
 
@@ -27,19 +33,39 @@
     <string-array name="spinner_category_search">
         <item>All</item>
         <item>Computer</item>
-        <item>Art</item>
+        <item>Islamic</item>
+        <item>Sciences</item>
+        <item>Art and Humanity</item>
         <item>Medicine</item>
         <item>Business</item>
         <item>Engineering</item>
+        <item>Communication</item>
         <item>General</item>
+        <item>Others</item>
     </string-array>
 
     <string-array name="spinner_condition_search">
         <item>All</item>
         <item>New</item>
         <item>Used</item>
-        <item>Very used</item>
         <item>Old</item>
     </string-array>
 
+
+    <string name="about_the_project">
+        <p>
+                This Application is developed in fulfillment for the requirement of Bachelor Degree.
+        The application facilitates buying, selling and giving out used books and study materials between students.
+        This Application is free and has no commissions on material bought or sold through it.
+        </p>
+
+    </string>
+
+    <string name="libility">
+        <p>
+            Be aware of and protect yourself against fraud, scams, phishing and all sort of physical attacks
+            We are not liable to any unethical use, physical or social issues that may arises while using this app.
+            Always share and meet in a public places or security cameras while delivaring/collecting item.
+        </p>
+    </string>
 </resources>
