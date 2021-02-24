@@ -1,14 +1,5 @@
 package com.example.bookrecycler;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -19,14 +10,32 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Looper;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.bookrecycler.notification.Data;
+import com.example.bookrecycler.notification.Sender;
+import com.example.bookrecycler.notification.Token;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
@@ -39,14 +48,16 @@ import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.auth.User;
+import com.google.gson.Gson;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -83,6 +94,8 @@ public class MessageActivity extends AppCompatActivity {
     //location request code constant
     public static final int LOCATION_REQUEST_CODE = 1;
 
+    //volley request queue for notification
+    private RequestQueue requestQueue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,10 +120,14 @@ public class MessageActivity extends AppCompatActivity {
         sendBtn = findViewById(R.id.msg_btn_send);
         msgET = findViewById(R.id.msg_text_send);
         gpsBtn = findViewById(R.id.gps_btn_send);
+        pd = new ProgressDialog(MessageActivity.this);
 
         //initialize firebase
         mAuth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
+
+        //init volley
+        requestQueue = Volley.newRequestQueue(getApplicationContext());
 
         //get reciver's Id (userId) from the intent
         userId = getIntent().getStringExtra("userId");
@@ -190,7 +207,6 @@ public class MessageActivity extends AppCompatActivity {
         //check if GPS on
         if(locationEnabled()){
             //gps is on, proceed to send the message
-            pd = new ProgressDialog(MessageActivity.this);
             pd.setMessage("Sending Location...");
             pd.show();
 
@@ -235,7 +251,7 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     //upload the location to firestore and add entries in chatList if not exist
-    private void sendLocation(String sender, String receiver,double latitude, double longitude) {
+    private void sendLocation(final String sender, final String receiver, double latitude, double longitude) {
 
         //generate random id for the msg
         final DocumentReference msgRef = firestore.collection("Chats").document();
@@ -258,6 +274,15 @@ public class MessageActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Void aVoid) {
                 pd.dismiss();
+                firestore.collection("Users").document(sender).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        String username = ""+ documentSnapshot.getString("name");
+                        //send notification
+                        sendNotification(receiver, username, "My Location");
+
+                    }
+                });
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -301,7 +326,7 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     //upload the msg to firestore and add entries in chatList if not exist
-    private void sendMessage(String sender, String receiver, String message) {
+    private void sendMessage(final String sender, final String receiver, final String message) {
 
         //generate random id for the msg
         final DocumentReference msgRef = firestore.collection("Chats").document();
@@ -320,7 +345,20 @@ public class MessageActivity extends AppCompatActivity {
         msgMap.put("geoPoint", new GeoPoint(0,0));
 
         //upload to firestore to Chats
-        firestore.collection("Chats").document(msgId).set(msgMap);
+        firestore.collection("Chats").document(msgId).set(msgMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                firestore.collection("Users").document(sender).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        String username = ""+ documentSnapshot.getString("name");
+                        //send notification
+                        sendNotification(receiver, username, message);
+
+                    }
+                });
+            }
+        });
 
         //upload info about sender and reciever to DB-> Chatlist, so these users will aprear in chatListActivity
         Map<String, Object> senderMap = new HashMap<>();
@@ -338,6 +376,9 @@ public class MessageActivity extends AppCompatActivity {
 
     //load msgs from firestore
     public void readMessages() {
+        //show progress dialog
+        pd.setMessage("Loading");
+        pd.show();
 
         msgList.clear();
 
@@ -361,6 +402,59 @@ public class MessageActivity extends AppCompatActivity {
                     msgAdapter = new MessageAdapter(MessageActivity.this, msgList);
                     msgRV.setAdapter(msgAdapter);
                 }
+                pd.dismiss();
+            }
+        });
+    }
+
+    private void sendNotification(final String receiver, final String username, final String message) {
+        firestore.collection("Tokens").document(receiver).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+
+                if (!documentSnapshot.exists()){
+                    return;
+                }
+
+                Token token = documentSnapshot.toObject(Token.class);
+                Data data = new Data(""+mAuth.getUid(), ""+username +": "+message, "New Message", ""+receiver,"ChatNotification" ,R.drawable.book_recycler_logo);
+
+                Sender sender = new Sender(data, token.getToken());
+
+                //send the notification to cloud messaging,fcm json object request
+                try {
+                    JSONObject senderJsonObj = new JSONObject(new Gson().toJson(sender));
+                    JsonObjectRequest jsonObjectRequest = new JsonObjectRequest("https://fcm.googleapis.com/fcm/send", senderJsonObj, new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            //response of the request
+                            Log.d("JSON_RESPONSE", "onResponse: " + response.toString());
+
+                        }
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.d("JSON_RESPONSE", "onResponse: " + error.getMessage());
+                        }
+                    }){
+                        @Override
+                        public Map<String, String> getHeaders() throws AuthFailureError {
+                            //put required headers
+                            Map<String,String> headers = new HashMap<>();
+                            headers.put("Content-Type", "application/json");
+                            headers.put("Authorization", "key=AAAAG3v1T8Q:APA91bFj-5lXId6n3dXd85fSwJB0F-WmkPDIfLZ230mWKGQk8dJvD4EEsTD3s8nzYb2PiA6KyRwboqfMda9-j_rt9BYi_DqWuSan1BttbgrGB1e-InV4d-5_IlOugzjBtNJ948NMwxMn");
+
+                            return headers;
+                        }
+                    };
+
+                    //add request to queue
+                    requestQueue.add(jsonObjectRequest);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
             }
         });
     }
