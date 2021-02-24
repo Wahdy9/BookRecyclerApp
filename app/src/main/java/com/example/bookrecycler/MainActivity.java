@@ -7,10 +7,12 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -45,6 +47,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class MainActivity extends AppCompatActivity {
 
     //views
+    private SwipeRefreshLayout refreshLayout;
     private FloatingActionButton Add_item_fab;
     private ImageButton filterBtn;
     private EditText searchET;
@@ -81,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("Book Recycler");
 
         //init views
+        refreshLayout = findViewById(R.id.main_refresh_layout);
         Add_item_fab = findViewById(R.id.Add_item_fab);
         filterBtn =  findViewById(R.id.filterBtn);
         searchET = findViewById(R.id.searchET);
@@ -114,11 +118,12 @@ public class MainActivity extends AppCompatActivity {
                         startActivity(LoginIntent);
                         break;
                     case R.id.nav_contact:
-                        Toast.makeText(MainActivity.this, "Contact", Toast.LENGTH_SHORT).show();
+                        Intent ContactUs = new Intent(MainActivity.this,Contac_Us.class);
+                        startActivity(ContactUs);
                         break;
-
-                    case R.id.nav_faq:
-                        Toast.makeText(MainActivity.this, "FAQ", Toast.LENGTH_SHORT).show();
+                    case R.id.nav_about_book:
+                        Intent About = new Intent(MainActivity.this,About_Page.class);
+                        startActivity(About);
                         break;
                     ///////////////////////////////////items of logged user layout////////////////////////////////////
                     case R.id.nav_log_profile:
@@ -185,6 +190,22 @@ public class MainActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 filter(s.toString());
 
+            }
+        });
+
+        //setup refresh layout
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        //stop refreshing
+                        refreshLayout.setRefreshing(false);
+                        //refresh activity
+                        refreshActivity();
+                    }
+                }, 3000);
             }
         });
 
