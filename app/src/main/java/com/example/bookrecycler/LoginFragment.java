@@ -138,7 +138,7 @@ public class LoginFragment extends Fragment {
                 if (task.isSuccessful()) {
                     progressBar.setVisibility(View.GONE);
                     getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                    Toast.makeText(getActivity(), "Logged as " + mAuth.getCurrentUser().getEmail(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Welcome " + mAuth.getCurrentUser().getEmail(), Toast.LENGTH_SHORT).show();
                     MainActivity.refreshMainActivity = true;//to refresh the MainActivity
                     getActivity().finish();
                 } else {
@@ -267,7 +267,7 @@ public class LoginFragment extends Fragment {
                 firebaseAuthWithGoogle(account.getIdToken());
             } catch (ApiException e) {
                 // Google Sign In failed, update UI appropriately
-                Toast.makeText(getActivity(), "Signin error" +e.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Sign in error" +e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -322,7 +322,7 @@ public class LoginFragment extends Fragment {
                             });
                         }else{
                             //otherwise, finish the activity
-                            Toast.makeText(getActivity(), "Logged as " + mAuth.getCurrentUser().getEmail(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(), "Welcome " + mAuth.getCurrentUser().getEmail(), Toast.LENGTH_SHORT).show();
                             MainActivity.refreshMainActivity = true;//to refresh the MainActivity
                             getActivity().finish();
                         }

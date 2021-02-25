@@ -605,5 +605,6 @@ public class MainActivity extends AppCompatActivity {
         selectedCategory = "All";
         selectedCondition = "All";
         populateRV();
+        changesDrawerLayout();
     }
 }

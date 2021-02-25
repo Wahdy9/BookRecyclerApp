@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
 
     <TextView
         android:id="@+id/bottom_sheet_header_tv"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:padding="15dp"
         android:text="Filter Options"
         android:textAlignment="center"
         android:textColor="@android:color/black"
@@ -17,7 +17,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/imageView23" />
 
     <TextView
         android:id="@+id/textView"
@@ -86,5 +86,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/view2" />
+
+    <ImageView
+        android:id="@+id/imageView23"
+        android:layout_width="0dp"
+        android:layout_height="46dp"
+        android:tint="@color/colorGrey2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_minus_sign" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
