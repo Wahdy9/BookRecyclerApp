@@ -1,4 +1,4 @@
-package com.example.bookrecycler;
+package com.example.bookrecycler.adapters;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -17,6 +17,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.bookrecycler.MessageActivity;
+import com.example.bookrecycler.R;
+import com.example.bookrecycler.models.MessageModel;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;

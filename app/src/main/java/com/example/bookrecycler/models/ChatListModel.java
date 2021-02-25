@@ -1,4 +1,4 @@
-package com.example.bookrecycler;
+package com.example.bookrecycler.models;
 
 import java.util.Date;
 
