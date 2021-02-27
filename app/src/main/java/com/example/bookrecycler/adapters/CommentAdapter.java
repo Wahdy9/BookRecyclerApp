@@ -1,6 +1,7 @@
-package com.example.bookrecycler;
+package com.example.bookrecycler.adapters;
 
 import android.content.Context;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,12 +12,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.bookrecycler.R;
+import com.example.bookrecycler.models.CommentModel;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.TimeZone;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -45,11 +49,14 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
 
+        //get the comment
+        CommentModel commentModel = commentList.get(position);
+
         //set the msg
-        holder.textTV.setText(commentList.get(position).getText());
+        holder.textTV.setText(commentModel.getText());
 
         //get username and image from firestore using userId, then assign them to views
-        firestore.collection("Users").document(commentList.get(position).getUser_id()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+        firestore.collection("Users").document(commentModel.getUser_id()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if(documentSnapshot.exists()) {
@@ -65,6 +72,15 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
                 }
             }
         });
+
+        //format and set the time
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        long time = commentModel.getTimestamp().toDate().getTime();
+        long now = System.currentTimeMillis();
+        CharSequence ago = DateUtils.getRelativeTimeSpanString(time, now, DateUtils.MINUTE_IN_MILLIS);
+        holder.timeTV.setText(ago);
     }
 
     @Override
@@ -74,7 +90,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
 
     public class ViewHolder extends RecyclerView.ViewHolder{
 
-        TextView textTV,usernameTV;
+        TextView textTV,usernameTV, timeTV;
         CircleImageView commentImg;
 
         public ViewHolder(@NonNull View itemView) {
@@ -83,6 +99,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
             textTV = itemView.findViewById(R.id.comment_text);
             usernameTV = itemView.findViewById(R.id.comment_username);
             commentImg = itemView.findViewById(R.id.comment_img);
+            timeTV = itemView.findViewById(R.id.comment_time);
 
         }
     }

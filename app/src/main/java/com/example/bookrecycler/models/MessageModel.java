@@ -1,4 +1,4 @@
-package com.example.bookrecycler;
+package com.example.bookrecycler.models;
 
 import com.google.firebase.firestore.GeoPoint;
 

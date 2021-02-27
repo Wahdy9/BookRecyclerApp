@@ -11,8 +11,12 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -30,15 +34,20 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.bookrecycler.adapters.ItemAdapter;
+import com.example.bookrecycler.models.ItemModel;
+import com.example.bookrecycler.notification.Token;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.util.ArrayList;
 
@@ -514,6 +523,40 @@ public class MainActivity extends AppCompatActivity {
             refreshActivity();
             refreshMainActivity = false;
         }
+
+        //update the notification token
+        FirebaseUser user = mAuth.getCurrentUser();
+        if(user !=null){
+            //save uid of currently signed in user in shared preference, it will be retreived in FirebaseMessaging
+            SharedPreferences sp = getSharedPreferences("SP_USER",MODE_PRIVATE);
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putString("Current_USERID",user.getUid());
+            editor.apply();
+            //update token
+            updateToken(FirebaseInstanceId.getInstance().getToken());
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        //update the notification token
+        FirebaseUser user = mAuth.getCurrentUser();
+        if(user !=null){
+            //save uid of currently signed in user in shared preference
+            SharedPreferences sp = getSharedPreferences("SP_USER",MODE_PRIVATE);
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putString("Current_USERID",user.getUid());
+            editor.apply();
+            //update token
+            updateToken(FirebaseInstanceId.getInstance().getToken());
+        }
+    }
+
+    public void updateToken(String token){
+        Token mToken = new Token(token);
+        firestore.collection("Tokens").document(mAuth.getUid()).set(mToken);
     }
 
     //Option menu
@@ -528,12 +571,31 @@ public class MainActivity extends AppCompatActivity {
             //change language here
 
 
-        }else if(item.getItemId() == R.id.option_refresh){
-            //refresh the activity
-            refreshActivity();
+        }else if(item.getItemId() == R.id.option_notification){
+            //Go to notification settings
+            sendToNotificationSettings();
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    //send to the notification settings, to en/disable notification
+    private void sendToNotificationSettings(){
+        Intent intent = new Intent();
+        //add extras to intent depending on your android version
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            intent.setAction(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+            intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+            intent.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
+            intent.putExtra("app_package", getPackageName());
+            intent.putExtra("app_uid", getApplicationInfo().uid);
+        } else {
+            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            intent.addCategory(Intent.CATEGORY_DEFAULT);
+            intent.setData(Uri.parse("package:" + getPackageName()));
+        }
+        startActivity(intent);
     }
 
     //method to refresh the activity
@@ -545,5 +607,6 @@ public class MainActivity extends AppCompatActivity {
         selectedCategory = "All";
         selectedCondition = "All";
         populateRV();
+        changesDrawerLayout();
     }
 }

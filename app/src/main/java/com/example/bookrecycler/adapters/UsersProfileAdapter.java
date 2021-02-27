@@ -1,4 +1,4 @@
-package com.example.bookrecycler;
+package com.example.bookrecycler.adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +11,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.bookrecycler.ItemDetailsActivity;
+import com.example.bookrecycler.R;
+import com.example.bookrecycler.models.ItemModel;
 
 import java.util.ArrayList;
 

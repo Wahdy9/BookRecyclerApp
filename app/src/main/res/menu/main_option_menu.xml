@@ -4,7 +4,7 @@
     <item android:title="Language"
         android:id="@+id/option_language"/>
 
-    <item android:title="Refresh"
-        android:id="@+id/option_refresh"/>
+    <item android:title="Notification"
+        android:id="@+id/option_notification"/>
 
 </menu>

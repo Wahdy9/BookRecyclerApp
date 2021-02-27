@@ -1,12 +1,12 @@
-package com.example.bookrecycler;
+package com.example.bookrecycler.models;
 
 import java.io.Serializable;
 import java.util.Date;
 
 public class ItemModel implements Serializable {
 
-    String itemId, userId, title, price, desc, category, condition, itemImg;
-    Date timePosted;
+    private String itemId, userId, title, price, desc, category, condition, itemImg;
+    private Date timePosted;
 
     public ItemModel() {
     }

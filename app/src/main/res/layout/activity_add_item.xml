@@ -225,10 +225,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="8dp"
+                android:tint="@android:color/black"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/view"
-                app:srcCompat="@drawable/ic_baseline_create_24"
-                app:tint="@android:color/black" />
+                app:srcCompat="@drawable/ic_baseline_create_24" />
 
             <ImageView
                 android:id="@+id/imageView10"
@@ -236,10 +236,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="16dp"
+                android:tint="@android:color/black"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/add_item_title"
-                app:srcCompat="@drawable/ic_book"
-                app:tint="@android:color/black" />
+                app:srcCompat="@drawable/ic_book" />
 
             <ImageView
                 android:id="@+id/imageView11"
@@ -247,10 +247,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="16dp"
+                android:tint="@android:color/black"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/add_item_category_spinner"
-                app:srcCompat="@drawable/ic_baseline_receipt_24"
-                app:tint="@android:color/black" />
+                app:srcCompat="@drawable/ic_clean" />
 
             <ImageView
                 android:id="@+id/imageView12"
@@ -258,10 +258,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="16dp"
+                android:tint="@android:color/black"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/add_item_condition_spinner"
-                app:srcCompat="@drawable/ic_outline_monetization_on_24"
-                app:tint="@android:color/black" />
+                app:srcCompat="@drawable/ic_outline_monetization_on_24" />
 
             <ImageView
                 android:id="@+id/imageView13"
@@ -269,10 +269,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="16dp"
+                android:tint="@android:color/black"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/add_item_price"
-                app:srcCompat="@drawable/ic_outline_receipt_long_24"
-                app:tint="@android:color/black" />
+                app:srcCompat="@drawable/ic_outline_receipt_long_24" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

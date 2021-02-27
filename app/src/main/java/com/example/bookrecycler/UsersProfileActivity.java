@@ -3,7 +3,6 @@ package com.example.bookrecycler;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
@@ -19,6 +18,8 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.bookrecycler.adapters.UsersProfileAdapter;
+import com.example.bookrecycler.models.ItemModel;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -101,6 +102,8 @@ public class UsersProfileActivity extends AppCompatActivity {
                         Intent intent = new Intent(UsersProfileActivity.this, MessageActivity.class);
                         intent.putExtra("userId", userId);
                         startActivity(intent);
+                    }else{
+                        Toast.makeText(UsersProfileActivity.this, "Can't chat with yourself", Toast.LENGTH_SHORT).show();
                     }
                 }else{
                     Toast.makeText(UsersProfileActivity.this, "You need to login..", Toast.LENGTH_LONG).show();
