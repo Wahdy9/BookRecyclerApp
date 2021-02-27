@@ -101,6 +101,8 @@ public class UsersProfileActivity extends AppCompatActivity {
                         Intent intent = new Intent(UsersProfileActivity.this, MessageActivity.class);
                         intent.putExtra("userId", userId);
                         startActivity(intent);
+                    }else{
+                        Toast.makeText(UsersProfileActivity.this, "Can't chat with yourself", Toast.LENGTH_SHORT).show();
                     }
                 }else{
                     Toast.makeText(UsersProfileActivity.this, "You need to login..", Toast.LENGTH_LONG).show();

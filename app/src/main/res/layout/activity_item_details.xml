@@ -163,7 +163,7 @@
                 android:tint="#585858"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/imageView14"
-                app:srcCompat="@drawable/ic_baseline_receipt_24" />
+                app:srcCompat="@drawable/ic_clean" />
 
             <ImageView
                 android:id="@+id/imageView16"

@@ -250,7 +250,7 @@
                 android:tint="@android:color/black"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/add_item_category_spinner"
-                app:srcCompat="@drawable/ic_baseline_receipt_24" />
+                app:srcCompat="@drawable/ic_clean" />
 
             <ImageView
                 android:id="@+id/imageView12"

@@ -192,6 +192,8 @@ public class ItemDetailsActivity extends AppCompatActivity {
                         Intent intent = new Intent(ItemDetailsActivity.this, MessageActivity.class);
                         intent.putExtra("userId", item.userId);
                         startActivity(intent);
+                    }else{
+                        Toast.makeText(ItemDetailsActivity.this, "Can't chat with yourself", Toast.LENGTH_SHORT).show();
                     }
                 }else{
                     Toast.makeText(ItemDetailsActivity.this, "You need to login..", Toast.LENGTH_LONG).show();
