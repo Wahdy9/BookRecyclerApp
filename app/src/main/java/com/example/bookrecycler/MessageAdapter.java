@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,8 +22,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TimeZone;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder>{
 
@@ -74,6 +78,19 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
         //get the msg
         final MessageModel msg = msgList.get(position);
+
+        //format and set time
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+            long time = msg.getTimestamp().getTime();
+
+            long now = System.currentTimeMillis();
+            CharSequence ago = DateUtils.getRelativeTimeSpanString(time, now, DateUtils.MINUTE_IN_MILLIS);
+            holder.timeTV.setText(ago);
+        }catch(Exception e){
+            Log.d("Message Adapter", "onBindViewHolder: " + e.getMessage());
+        }
 
         //check if msg is a map, image or normal text
         if(msg.isMap()) {
@@ -170,13 +187,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     public  class ViewHolder extends RecyclerView.ViewHolder {
 
-        public TextView show_message;
+        public TextView show_message, timeTV;
         public ImageView myLocationIV;
 
         public ViewHolder(View itemView) {
             super(itemView);
             show_message = itemView.findViewById(R.id.show_message);
             myLocationIV = itemView.findViewById(R.id.myLocation);
+            timeTV = itemView.findViewById(R.id.msgTimeTV);
 
         }
     }

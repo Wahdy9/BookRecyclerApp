@@ -250,7 +250,7 @@ public class MessageActivity extends AppCompatActivity {
         msgMap.put("map", true);
         msgMap.put("image", false);
         msgMap.put("message", "");
-        msgMap.put("timestamp", FieldValue.serverTimestamp());
+        msgMap.put("timestamp", new Timestamp(new Date()));
         msgMap.put("geoPoint", new GeoPoint(latitude,longitude));
 
         //upload to firestore to Chats
@@ -316,7 +316,7 @@ public class MessageActivity extends AppCompatActivity {
         msgMap.put("map", false);
         msgMap.put("image", false);
         msgMap.put("message", message);
-        msgMap.put("timestamp", FieldValue.serverTimestamp());
+        msgMap.put("timestamp", new Timestamp(new Date()));
         msgMap.put("geoPoint", new GeoPoint(0,0));
 
         //upload to firestore to Chats

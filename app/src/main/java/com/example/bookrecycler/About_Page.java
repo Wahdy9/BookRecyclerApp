@@ -13,6 +13,7 @@ public class About_Page extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about__page);
 
+        //toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -24,5 +25,6 @@ public class About_Page extends AppCompatActivity {
                 finish();
             }
         });
+
     }
 }

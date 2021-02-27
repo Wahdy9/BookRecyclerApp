@@ -68,11 +68,17 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
 
+        //to solve the moreBtn problem, so it wont appear in items that doesn't belong to current user
+        holder.setIsRecyclable(false);
+
+        //get the item
+        final ItemModel itemModel = itemList.get(position);
+
         //set title
-        holder.titleTV.setText(itemList.get(position).title);
+        holder.titleTV.setText(itemModel.title);
 
         //get username from firestore using userId then set the view
-        firestore.collection("Users").document(itemList.get(position).userId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+        firestore.collection("Users").document(itemModel.userId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if (documentSnapshot.exists()) {
@@ -85,13 +91,13 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 
-        long time = itemList.get(position).timePosted.getTime();
+        long time = itemModel.timePosted.getTime();
         long now = System.currentTimeMillis();
         CharSequence ago = DateUtils.getRelativeTimeSpanString(time, now, DateUtils.MINUTE_IN_MILLIS);
         holder.timeTV.setText(ago);
 
         //get comment counts
-        firestore.collection("Items").document(itemList.get(position).getItemId()).collection("Comments").addSnapshotListener(new EventListener<QuerySnapshot>() {
+        firestore.collection("Items").document(itemModel.getItemId()).collection("Comments").addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
                 if (!queryDocumentSnapshots.isEmpty()) {//if no comments
@@ -105,14 +111,14 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
 
         //set item image and add a placeholder, just incase
         RequestOptions requestOptions = new RequestOptions().placeholder(R.color.colorGrey2);
-        Glide.with(mContext).setDefaultRequestOptions(requestOptions).load(itemList.get(position).itemImg).into(holder.imgIV);
+        Glide.with(mContext).setDefaultRequestOptions(requestOptions).load(itemModel.itemImg).into(holder.imgIV);
 
         //set category
-        holder.categoryTV.setText(itemList.get(position).category);
+        holder.categoryTV.setText(itemModel.category);
 
         //if item belong to current user, show more btn, so user can edit or delete item
         if(mAuth.getCurrentUser() != null) {
-            if (mAuth.getCurrentUser().getUid().equals(itemList.get(holder.getAdapterPosition()).getUserId())) {
+            if (mAuth.getCurrentUser().getUid().equals(itemModel.getUserId())) {
                 holder.moreIV.setVisibility(View.VISIBLE);
                 holder.moreIV.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -127,7 +133,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
 
                         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                             @Override
-                            public boolean onMenuItemClick(MenuItem item) {
+                            public boolean onMenuItemClick(final MenuItem item) {
                                 int id = item.getItemId();
                                 if(id==0){
                                     //delete item
@@ -140,7 +146,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
                                                     //if yes, begin the delete
-                                                    beginDelete(itemList.get(position).getItemId(), itemList.get(position).getItemImg());
+                                                    beginDelete(itemModel.getItemId(), itemModel.getItemImg());
                                                 }
                                             }).setNegativeButton(android.R.string.no, null).show();
 
@@ -149,7 +155,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
                                     //start AddPostActivity with extras:edit_mode & itemToEdit
                                     Intent intent = new Intent(mContext, AddItemActivity.class);
                                     intent.putExtra("edit_mode", true);
-                                    intent.putExtra("item_to_edit", itemList.get(position));
+                                    intent.putExtra("item_to_edit", itemModel);
                                     mContext.startActivity(intent);
                                 }
 
@@ -172,7 +178,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
 
                 //go to itemDetailActivity
                 Intent intent = new Intent(v.getContext(), ItemDetailsActivity.class);
-                intent.putExtra("item", itemList.get(position));
+                intent.putExtra("item", itemModel);
                 v.getContext().startActivity(intent);
 
             }

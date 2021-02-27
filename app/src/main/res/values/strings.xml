@@ -1,51 +1,58 @@
 <resources>
     <string name="app_name">Book Recycler</string>
 
+    <string name="contact_us">Contact us</string>
+    <string name="about">About</string>
+
     <!-- Required by navigation drawer toggle button -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="contact_us">Contact Us</string>
-    <string name="about">About</string>
 
 
     <!-- For the spinners in AddItemActivity -->
     <string-array name="spinner_category_types">
         <item>Computer</item>
-        <item>Art &amp; Humanity</item>
-        <item>Medicine</item>
-        <item>Accounting</item>
-        <item>Engineering</item>
-        <item>Environmental</item>
+        <item>Islamic</item>
         <item>Sciences</item>
-        <item>Agriculture</item>
+        <item>Art</item>
+        <item>language</item>
+        <item>Medicine</item>
+        <item>Business</item>
+        <item>Engineering</item>
+        <item>Communication</item>
+        <item>General</item>
         <item>Others</item>
     </string-array>
 
     <string-array name="spinner_condition_types">
-        <item>new (Less than 1 month)</item>
-        <item>Used (less than 3 months)</item>
-        <item>Old (more than 5 months)</item>
+        <item>New</item>
+        <item>Used</item>
+        <item>Old</item>
     </string-array>
 
     <!-- For the spinners in MainActivity for the filtering -->
     <string-array name="spinner_category_search">
         <item>All</item>
         <item>Computer</item>
-        <item>Art &amp; Humanity</item>
-        <item>Medicine</item>
-        <item>Accounting</item>
-        <item>Engineering</item>
-        <item>Environmental</item>
+        <item>Islamic</item>
         <item>Sciences</item>
-        <item>Agriculture</item>
+        <item>Art</item>
+        <item>language</item>
+        <item>Medicine</item>
+        <item>Business</item>
+        <item>Engineering</item>
+        <item>Communication</item>
+        <item>General</item>
         <item>Others</item>
     </string-array>
 
     <string-array name="spinner_condition_search">
-        <item>new (Less than 1 month)</item>
-        <item>Used (less than 3 months)</item>
-        <item>Old (more than 5 months)</item>
+        <item>All</item>
+        <item>New</item>
+        <item>Used</item>
+        <item>Old</item>
     </string-array>
+
 
     <string name="about_the_project">
         <p>
@@ -56,11 +63,11 @@
 
     </string>
 
-    <string name="libility">
+    <string name="liability">
         <p>
             Be aware of and protect yourself against fraud, scams, phishing and all sort of physical attacks
             We are not liable to any unethical use, physical or social issues that may arises while using this app.
-            Always share and meet in a public places or security cameras while delivaring/collecting item.
+            Always share and meet in a public places or security cameras while delivering/collecting item.
         </p>
     </string>
 </resources>
