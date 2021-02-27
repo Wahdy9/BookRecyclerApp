@@ -33,6 +33,9 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.bookrecycler.adapters.MessageAdapter;
+import com.example.bookrecycler.models.MessageModel;
+import com.example.bookrecycler.models.UserModel;
 import com.example.bookrecycler.notification.Data;
 import com.example.bookrecycler.notification.Sender;
 import com.example.bookrecycler.notification.Token;
@@ -142,8 +145,7 @@ public class MessageActivity extends AppCompatActivity {
                     if (user.getImg_url().equals("default")) {
                         profile_image.setImageResource(R.drawable.user_profile);
                     } else {
-                        RequestOptions requestOptions = new RequestOptions();
-                        requestOptions.placeholder(R.drawable.user_profile);
+                        RequestOptions requestOptions = new RequestOptions().placeholder(R.drawable.user_profile);
                         Glide.with(getApplicationContext()).setDefaultRequestOptions(requestOptions).load(user.getImg_url()).into(profile_image);
                     }
                 }

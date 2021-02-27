@@ -3,7 +3,6 @@ package com.example.bookrecycler;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
@@ -18,27 +17,23 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.bookrecycler.adapters.CommentAdapter;
+import com.example.bookrecycler.models.CommentModel;
+import com.example.bookrecycler.models.ItemModel;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.zolad.zoominimageview.ZoomInImageView;
 
-import org.w3c.dom.Comment;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-
-import javax.annotation.Nullable;
 
 public class ItemDetailsActivity extends AppCompatActivity {
 
@@ -114,7 +109,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
         descritionTV.setText(item.getDesc());
 
         //get username from firestore using userId then set the view
-        firestore.collection("Users").document(item.userId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+        firestore.collection("Users").document(item.getUserId()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if (documentSnapshot.exists()) {
@@ -188,9 +183,9 @@ public class ItemDetailsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if(mAuth.getCurrentUser() != null) {
                     //this (if) is to prevent user to chat with himself
-                    if(!mAuth.getCurrentUser().getUid().equals(item.userId)) {
+                    if(!mAuth.getCurrentUser().getUid().equals(item.getUserId())) {
                         Intent intent = new Intent(ItemDetailsActivity.this, MessageActivity.class);
-                        intent.putExtra("userId", item.userId);
+                        intent.putExtra("userId", item.getUserId());
                         startActivity(intent);
                     }else{
                         Toast.makeText(ItemDetailsActivity.this, "Can't chat with yourself", Toast.LENGTH_SHORT).show();

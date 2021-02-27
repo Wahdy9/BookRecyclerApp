@@ -1,4 +1,4 @@
-package com.example.bookrecycler;
+package com.example.bookrecycler.adapters;
 
 import android.content.Context;
 import android.text.format.DateUtils;
@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.bookrecycler.R;
+import com.example.bookrecycler.models.CommentModel;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;

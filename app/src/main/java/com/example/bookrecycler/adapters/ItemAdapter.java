@@ -1,4 +1,4 @@
-package com.example.bookrecycler;
+package com.example.bookrecycler.adapters;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -22,6 +22,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.bookrecycler.AddItemActivity;
+import com.example.bookrecycler.ItemDetailsActivity;
+import com.example.bookrecycler.MainActivity;
+import com.example.bookrecycler.R;
+import com.example.bookrecycler.models.ItemModel;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -75,10 +80,10 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
         final ItemModel itemModel = itemList.get(position);
 
         //set title
-        holder.titleTV.setText(itemModel.title);
+        holder.titleTV.setText(itemModel.getTitle());
 
         //get username from firestore using userId then set the view
-        firestore.collection("Users").document(itemModel.userId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+        firestore.collection("Users").document(itemModel.getUserId()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if (documentSnapshot.exists()) {
@@ -91,7 +96,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 
-        long time = itemModel.timePosted.getTime();
+        long time = itemModel.getTimePosted().getTime();
         long now = System.currentTimeMillis();
         CharSequence ago = DateUtils.getRelativeTimeSpanString(time, now, DateUtils.MINUTE_IN_MILLIS);
         holder.timeTV.setText(ago);
@@ -111,10 +116,10 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
 
         //set item image and add a placeholder, just incase
         RequestOptions requestOptions = new RequestOptions().placeholder(R.color.colorGrey2);
-        Glide.with(mContext).setDefaultRequestOptions(requestOptions).load(itemModel.itemImg).into(holder.imgIV);
+        Glide.with(mContext).setDefaultRequestOptions(requestOptions).load(itemModel.getItemImg()).into(holder.imgIV);
 
         //set category
-        holder.categoryTV.setText(itemModel.category);
+        holder.categoryTV.setText(itemModel.getCategory());
 
         //if item belong to current user, show more btn, so user can edit or delete item
         if(mAuth.getCurrentUser() != null) {

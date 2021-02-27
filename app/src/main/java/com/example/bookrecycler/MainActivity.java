@@ -34,6 +34,8 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.bookrecycler.adapters.ItemAdapter;
+import com.example.bookrecycler.models.ItemModel;
 import com.example.bookrecycler.notification.Token;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
