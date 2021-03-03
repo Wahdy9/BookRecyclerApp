@@ -16,6 +16,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -200,7 +201,7 @@ public class AddItemActivity extends AppCompatActivity {
 
             //check if user picked newer image
             if(!image_uri.toString().equalsIgnoreCase(itemToEdit.getItemImg())){
-                //upload the new image with the same name as prevous to overwrite
+                //upload the new image with the same name as previous to overwrite
 
                 //TODO: Compress image here(DONE)
                 File imgFile = new File(image_uri.getPath());
@@ -240,12 +241,14 @@ public class AddItemActivity extends AppCompatActivity {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
-                                                    Toast.makeText(AddItemActivity.this, "Item updated successfully", Toast.LENGTH_LONG).show();
+                                                    Toast.makeText(AddItemActivity.this, "Item updated successfully", Toast.LENGTH_SHORT).show();
                                                     MainActivity.refreshMainActivity = true;//to refresh the MainActivity
                                                     MyItemsActivity.refreshMyItemsActivity = true;//to refresh the MyItemActivity
                                                     finish();
                                                 } else {
-                                                    Toast.makeText(AddItemActivity.this, "Firestore error:" + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                                    //error with firestore
+                                                    Toast.makeText(AddItemActivity.this, "Something went wrong\nplease try again later" , Toast.LENGTH_LONG).show();
+                                                    Log.d("AddItemActivity", "onComplete(Upload to firestore): " + task.getException().getMessage());
                                                 }
                                                 pd.dismiss();
                                             }
@@ -259,10 +262,9 @@ public class AddItemActivity extends AppCompatActivity {
                 }catch (IOException e) {
                     //compress image exception
                     pd.dismiss();
-                    Toast.makeText(AddItemActivity.this, "error:" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(AddItemActivity.this, "Something went wrong\nplease try again later", Toast.LENGTH_LONG).show();
+                    Log.d("AddItemActivity", "Compress error: " + e.getMessage());
                 }
-
-
 
             }else{
                 //if user didn't pick a new image, just update the other fields
@@ -279,12 +281,14 @@ public class AddItemActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                            Toast.makeText(AddItemActivity.this, "Item updated successfully", Toast.LENGTH_LONG).show();
+                            Toast.makeText(AddItemActivity.this, "Item updated successfully", Toast.LENGTH_SHORT).show();
                             MainActivity.refreshMainActivity = true;//to refresh the MainActivity
                             MyItemsActivity.refreshMyItemsActivity = true;//to refresh the MyItemActivity
                             finish();
                         } else {
-                            Toast.makeText(AddItemActivity.this, "Firestore error:" + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                            //error with firestore
+                            Toast.makeText(AddItemActivity.this, "Something went wrong\nplease try again later" , Toast.LENGTH_LONG).show();
+                            Log.d("AddItemActivity", "onComplete(Upload to firestore): " + task.getException().getMessage());
                         }
                         pd.dismiss();
                     }
@@ -329,7 +333,6 @@ public class AddItemActivity extends AppCompatActivity {
                     compressedImg.compress(Bitmap.CompressFormat.JPEG, 100, baos);
                     byte[] imgBytes = baos.toByteArray();
 
-
                     //upload img to storage
                     final StorageReference imgStorageRef = firebaseStorage.getReference().child("Items Image").child(itemId);
                     imgStorageRef.putBytes(imgBytes).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
@@ -359,24 +362,26 @@ public class AddItemActivity extends AppCompatActivity {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
-                                                    Toast.makeText(AddItemActivity.this, "Item uploaded successfully", Toast.LENGTH_LONG).show();
+                                                    Toast.makeText(AddItemActivity.this, "Item uploaded successfully", Toast.LENGTH_SHORT).show();
                                                     MainActivity.refreshMainActivity = true;//to refresh the MainActivity
                                                     MyItemsActivity.refreshMyItemsActivity = true;//to refresh the MyItemActivity
                                                     finish();
                                                 } else {
-                                                    Toast.makeText(AddItemActivity.this, "Firestore error:" + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                                    //error with firestore
+                                                    Toast.makeText(AddItemActivity.this, "Something went wrong\nplease try again later" , Toast.LENGTH_LONG).show();
+                                                    Log.d("AddItemActivity", "onComplete(Upload to firestore): " + task.getException().getMessage());
                                                 }
                                                 pd.dismiss();
                                             }
                                         });
-
                                     }
                                 });
 
-
                             } else {
+                                //error with storage
                                 pd.dismiss();
-                                Toast.makeText(AddItemActivity.this, "Storage Error : " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                Toast.makeText(AddItemActivity.this, "Something went wrong\nplease try again later", Toast.LENGTH_LONG).show();
+                                Log.d("AddItemActivity", "onComplete(Storage error): " + task.getException().getMessage());
                             }
                         }
                     });
@@ -384,19 +389,17 @@ public class AddItemActivity extends AppCompatActivity {
                 }catch (IOException e) {
                     //compress image exception
                     pd.dismiss();
-                    Toast.makeText(AddItemActivity.this, "error:" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(AddItemActivity.this, "Something went wrong\nplease try again later", Toast.LENGTH_LONG).show();
+                    Log.d("AddItemActivity", "Compress error: " + e.getMessage());
                 }
-
             }else{
                 //image is not picked
                 Toast.makeText(this, "Please pick an image", Toast.LENGTH_SHORT).show();
             }
-
         }else{
             //fields values not filled
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
         }
-
     }
 
 
@@ -440,7 +443,8 @@ public class AddItemActivity extends AppCompatActivity {
 
 
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-                Toast.makeText(AddItemActivity.this, "error: " + result.getError(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Error picking up image", Toast.LENGTH_SHORT).show();
+                Log.d("AddItemActivity", "onActivityResult(Pickup image): " + result.getError());
             }
         }
     }

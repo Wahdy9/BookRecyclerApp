@@ -126,7 +126,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
                 if(mAuth.getCurrentUser() != null){
                     sendComment(item.getItemId());
                 }else{
-                    Toast.makeText(ItemDetailsActivity.this, "You need to login first", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ItemDetailsActivity.this, "You need to login", Toast.LENGTH_SHORT).show();
                     Intent loginIntent = new Intent(ItemDetailsActivity.this, LoginAndRegisterActivity.class);
                     startActivity(loginIntent);
                 }
@@ -156,21 +156,22 @@ public class ItemDetailsActivity extends AppCompatActivity {
                         //Favor the item, create a document in favorites and change the icon
                         HashMap<String, Object> map = new HashMap<>();
                         map.put("itemId", item.getItemId());
-                        firestore.collection("Users").document(mAuth.getUid()).collection("Favorites").document(item.getItemId()).set(map);
+                        firestore.collection("Users").document(mAuth.getUid()).collection("Favorites")
+                                .document(item.getItemId()).set(map);
                         favoriteIV.setImageResource(R.drawable.ic_favorite_red);
                         favoriteIV.setTag(R.drawable.ic_favorite_red);//tag used in (if), to compare the icon
                         Toast.makeText(ItemDetailsActivity.this, "Item added to favorite", Toast.LENGTH_SHORT).show();
                     } else {
                         //unfavor the item, delete a document in favorites and change the icon
-                        firestore.collection("Users").document(mAuth.getUid()).collection("Favorites").document(item.getItemId()).delete();
+                        firestore.collection("Users").document(mAuth.getUid()).collection("Favorites")
+                                .document(item.getItemId()).delete();
                         favoriteIV.setImageResource(R.drawable.ic_favorite_grey);
                         favoriteIV.setTag(R.drawable.ic_favorite_grey);
                         Toast.makeText(ItemDetailsActivity.this, "Item removed from favorite", Toast.LENGTH_SHORT).show();
                     }
-
                 }else{
                     //if not logged , send to login activity
-                    Toast.makeText(ItemDetailsActivity.this, "You need to login first", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ItemDetailsActivity.this, "You need to login", Toast.LENGTH_SHORT).show();
                     Intent loginIntent = new Intent(ItemDetailsActivity.this, LoginAndRegisterActivity.class);
                     startActivity(loginIntent);
                 }
@@ -191,7 +192,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
                         Toast.makeText(ItemDetailsActivity.this, "Can't chat with yourself", Toast.LENGTH_SHORT).show();
                     }
                 }else{
-                    Toast.makeText(ItemDetailsActivity.this, "You need to login..", Toast.LENGTH_LONG).show();
+                    Toast.makeText(ItemDetailsActivity.this, "You need to login", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(ItemDetailsActivity.this, LoginAndRegisterActivity.class);
                     startActivity(intent);
                 }

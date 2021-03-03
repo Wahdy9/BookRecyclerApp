@@ -15,6 +15,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -138,7 +139,9 @@ public class MyProfileActivity extends AppCompatActivity {
                     }
                     pd.dismiss();
                 }else{
-                    Toast.makeText(MyProfileActivity.this, "Error:" + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                    //error loading data
+                    Toast.makeText(MyProfileActivity.this, "Something went wrong\nplease try again later" , Toast.LENGTH_LONG).show();
+                    Log.d("MyProfileActivity", "onComplete(Loading data from firestore): "+ task.getException().getMessage());
                     pd.dismiss();
                 }
             }
@@ -206,7 +209,7 @@ public class MyProfileActivity extends AppCompatActivity {
                 if(!TextUtils.isEmpty(name)  && !TextUtils.isEmpty(phone)){
                     //check if username is not more than 15 character
                     if(name.length() >15){
-                        Toast.makeText(MyProfileActivity.this, "Name must not exceed 15 charcters", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MyProfileActivity.this, "Name must not exceed 15 characters", Toast.LENGTH_SHORT).show();
                         pd.dismiss();
                         return;
                     }
@@ -253,14 +256,16 @@ public class MyProfileActivity extends AppCompatActivity {
                                     }else{
                                         //image failed to upload
                                         pd.dismiss();
-                                        Toast.makeText(MyProfileActivity.this, "STORAGE ERROR: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                        Toast.makeText(MyProfileActivity.this, "Something went wrong\nplease try again later", Toast.LENGTH_LONG).show();
+                                        Log.d("MyProfileActivity", "onComplete(Image upload): "+task.getException().getMessage());
                                     }
                                 }
                             });
                         } catch (IOException e) {
                             //compress image exception
                             pd.dismiss();
-                            Toast.makeText(MyProfileActivity.this, "error:" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MyProfileActivity.this, "Something went wrong\nplease try again later", Toast.LENGTH_LONG).show();
+                            Log.d("MyProfileActivity", "onClick(Compress image): " + e.getMessage());
                         }
 
 
@@ -280,7 +285,7 @@ public class MyProfileActivity extends AppCompatActivity {
 
     }
 
-    //method to upload image to firestore
+    //method to upload data to firestore
     private void uploadToFirestore(Map userMap){
         //upload everything to firestore
         firestore.collection("Users").document(mAuth.getUid()).set(userMap).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -290,7 +295,8 @@ public class MyProfileActivity extends AppCompatActivity {
                     Toast.makeText(MyProfileActivity.this, "Profile Updated Successfully!", Toast.LENGTH_LONG).show();
                     MainActivity.refreshMainActivity = true;//to refresh the MainActivity
                 }else{
-                    Toast.makeText(MyProfileActivity.this, "FIRESTROE ERROR: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(MyProfileActivity.this, "Something went wrong\nplease try again later", Toast.LENGTH_LONG).show();
+                    Log.d("MyProfileActivity", "onComplete(Upload to firestore): " + task.getException().getMessage());
                 }
                 pd.dismiss();
             }
@@ -311,7 +317,8 @@ public class MyProfileActivity extends AppCompatActivity {
                 isChanged = true;
 
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-                Toast.makeText(MyProfileActivity.this, "error: " + result.getError(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(MyProfileActivity.this, "Error picking up image", Toast.LENGTH_SHORT).show();
+                Log.d("MyProfileActivity", "onActivityResult(Pick up image): " + result.getError());
             }
         }
     }

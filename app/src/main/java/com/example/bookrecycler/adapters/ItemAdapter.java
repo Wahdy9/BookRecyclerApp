@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -223,7 +224,8 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
             public void onFailure(@NonNull Exception e) {
                 //fail to delete img
                 pd.dismiss();
-                Toast.makeText(mContext, "Error:" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, "Something went wrong\nplease try again later", Toast.LENGTH_LONG).show();
+                Log.d("ItemAdapter", "onFailure(Delete image): " + e.getMessage());
             }
         });
 

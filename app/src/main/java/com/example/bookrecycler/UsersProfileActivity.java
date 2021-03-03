@@ -9,6 +9,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -106,7 +107,7 @@ public class UsersProfileActivity extends AppCompatActivity {
                         Toast.makeText(UsersProfileActivity.this, "Can't chat with yourself", Toast.LENGTH_SHORT).show();
                     }
                 }else{
-                    Toast.makeText(UsersProfileActivity.this, "You need to login..", Toast.LENGTH_LONG).show();
+                    Toast.makeText(UsersProfileActivity.this, "You need to login", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(UsersProfileActivity.this, LoginAndRegisterActivity.class);
                     startActivity(intent);
                 }
@@ -128,7 +129,7 @@ public class UsersProfileActivity extends AppCompatActivity {
                     }
 
                 }else{
-                    Toast.makeText(UsersProfileActivity.this, "You need to login..", Toast.LENGTH_LONG).show();
+                    Toast.makeText(UsersProfileActivity.this, "You need to login", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(UsersProfileActivity.this, LoginAndRegisterActivity.class);
                     startActivity(intent);
                 }
@@ -153,7 +154,7 @@ public class UsersProfileActivity extends AppCompatActivity {
                     }
 
                 }else{
-                    Toast.makeText(UsersProfileActivity.this, "You need to login..", Toast.LENGTH_LONG).show();
+                    Toast.makeText(UsersProfileActivity.this, "You need to login", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(UsersProfileActivity.this, LoginAndRegisterActivity.class);
                     startActivity(intent);
                 }
@@ -168,11 +169,11 @@ public class UsersProfileActivity extends AppCompatActivity {
 
     //load and setup the rating
     private void setupRating() {
-
-        //check if user logged in andprofile not belong to the current user
+        //check if user logged in and profile not belong to the current user
         if(mAuth.getCurrentUser()!= null && !mAuth.getUid().equalsIgnoreCase(userId)){
             //get the rate of current logged user and assign it to the rating bar
-            firestore.collection("Users").document(userId).collection("Ratings").document(mAuth.getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            firestore.collection("Users").document(userId).collection("Ratings").
+                    document(mAuth.getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                 @Override
                 public void onSuccess(DocumentSnapshot documentSnapshot) {
                     if (documentSnapshot.exists()){
@@ -190,10 +191,9 @@ public class UsersProfileActivity extends AppCompatActivity {
                     Map<String, Object> ratingMap = new HashMap<>();
                     ratingMap.put("userId", mAuth.getUid());
                     ratingMap.put("stars", ratingBar.getRating());
-
                     //upload to firestore
-                    firestore.collection("Users").document(userId).collection("Ratings").document(mAuth.getUid()).set(ratingMap);
-
+                    firestore.collection("Users").document(userId).collection("Ratings")
+                            .document(mAuth.getUid()).set(ratingMap);
                     //refresh the average rating textView
                     loadAverageRating();
                 }
@@ -203,7 +203,6 @@ public class UsersProfileActivity extends AppCompatActivity {
             //hide the rating, when user enter his profile OR Guest enter
             ratingBar.setVisibility(View.GONE);
         }
-
         //get the avg rating
         loadAverageRating();
     }
@@ -243,7 +242,8 @@ public class UsersProfileActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if(!task.isSuccessful()){
-                    Toast.makeText(UsersProfileActivity.this, "error:" + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(UsersProfileActivity.this, "Something went wrong\nplease try again later" , Toast.LENGTH_LONG).show();
+                    Log.d("UsersProfileActivity", "onComplete: " + task.getException().getMessage());
                     return;
                 }
                 //get info and assign them to views

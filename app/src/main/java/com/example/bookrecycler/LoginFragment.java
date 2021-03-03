@@ -10,6 +10,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import android.text.InputType;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -142,7 +143,7 @@ public class LoginFragment extends Fragment {
                     MainActivity.refreshMainActivity = true;//to refresh the MainActivity
                     getActivity().finish();
                 } else {
-                    Toast.makeText(getActivity(), "Error, please try later " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "" + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                     progressBar.setVisibility(View.GONE);
                     getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                 }
@@ -210,7 +211,7 @@ public class LoginFragment extends Fragment {
                 if(task.isSuccessful()){
                     Toast.makeText(getActivity(), "Email sent", Toast.LENGTH_LONG).show();
                 }else{
-                    Toast.makeText(getActivity(), "Fail..", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Fail, please try again later", Toast.LENGTH_SHORT).show();
                 }
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -219,7 +220,8 @@ public class LoginFragment extends Fragment {
                 //email sent fail
                 progressBar.setVisibility(View.GONE);
                 getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), ""+e.getMessage(), Toast.LENGTH_LONG).show();
+                Log.d("LoginFragment", "onFailure: " + e.getMessage());
             }
         });
     }
@@ -267,8 +269,8 @@ public class LoginFragment extends Fragment {
                 firebaseAuthWithGoogle(account.getIdToken());
             } catch (ApiException e) {
                 // Google Sign In failed, update UI appropriately
-                Toast.makeText(getActivity(), "Sign in error" +e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
+                Toast.makeText(getActivity(), "Something went wrong\nplease try again later" , Toast.LENGTH_LONG).show();
+                Log.d("LoginFragment", "onFailure(Google signin): " + e.getMessage());            }
         }
     }
 
@@ -305,7 +307,8 @@ public class LoginFragment extends Fragment {
 
                             //upload to firestore
                             FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-                            firestore.collection("Users").document(mAuth.getCurrentUser().getUid()).set(userMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            firestore.collection("Users").document(mAuth.getCurrentUser().getUid()).set(userMap)
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                     //data uploaded successfully to firestore
@@ -317,7 +320,8 @@ public class LoginFragment extends Fragment {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
                                     //error when uploading data to firestore
-                                    Toast.makeText(getActivity(), "ERROR: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                    Toast.makeText(getActivity(), "Something went wrong\nplease try again later" , Toast.LENGTH_LONG).show();
+                                    Log.d("LoginFragment", "onFailure: " + e.getMessage());
                                 }
                             });
                         }else{
@@ -326,14 +330,12 @@ public class LoginFragment extends Fragment {
                             MainActivity.refreshMainActivity = true;//to refresh the MainActivity
                             getActivity().finish();
                         }
-
                     } else {
                         // If sign in fails, display a message to the user.
-                        Toast.makeText(getActivity(), "Authentication Failed.\n"+task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity(), ""+task.getException().getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
             });
-
     }
 
 }
