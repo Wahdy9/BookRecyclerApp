@@ -1,17 +1,23 @@
 package com.example.bookrecycler.adapters;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.bookrecycler.ChatListActivity;
+import com.example.bookrecycler.MainActivity;
 import com.example.bookrecycler.MessageActivity;
 import com.example.bookrecycler.R;
 import com.example.bookrecycler.models.UserModel;
@@ -88,10 +94,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
                 holder.newMsgsBadge.setVisibility(View.GONE);
                 //set the new message in firestore to false, so it wont show the badge next time
                 Map<String, Object> senderMap = new HashMap<>();
-                senderMap.put("id", user.getId());
                 senderMap.put("newMsgs",false);
-                senderMap.put("timestamp", new Timestamp(new Date()));
-                firestore.collection("Chatlist").document(mAuth.getUid()).collection("Contacted").document(user.getId()).set(senderMap);
+                firestore.collection("Chatlist").document(mAuth.getUid()).collection("Contacted").document(user.getId()).update(senderMap);
                 //start MessageActivity
                 Intent intent = new Intent(mContext, MessageActivity.class);
                 intent.putExtra("userId", user.getId());
@@ -99,7 +103,53 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
             }
         });
 
+        //delete chatlist on long press
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                //Show warning dialog first
+                new AlertDialog.Builder(mContext)
+                        .setTitle("Delete")
+                        .setMessage("Are you sure you want to delete?")
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //if yes, begin the delete
+                                beginDelete(user.getId());
+                            }
+                        }).setNegativeButton(android.R.string.no, null).show();
+
+                return false;
+            }
+        });
+
     }
+
+    //delete the item
+    private void beginDelete(final String userId){
+        //show progress dialog
+        final ProgressDialog pd = new ProgressDialog(mContext);
+        pd.setMessage("Deleting..");
+        pd.show();
+
+        //delete from firestore
+        firestore.collection("Chatlist").document(mAuth.getUid()).collection("Contacted").document(userId).delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        //refresh activity
+                        if (mContext instanceof ChatListActivity) {
+                            ((ChatListActivity)mContext).getMyUsers();
+
+                        }
+
+                        Toast.makeText(mContext, "Deleted Successfully", Toast.LENGTH_SHORT).show();
+                        pd.dismiss();
+                    }
+                });
+    }
+
 
     @Override
     public int getItemCount() {

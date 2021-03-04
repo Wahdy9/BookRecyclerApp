@@ -110,19 +110,19 @@ public class ChatListActivity extends AppCompatActivity {
             }
         });
 
+        getMyUsers();
+    }
+
+    //get users we chatted with, display them in RV
+    public void getMyUsers(){
         //show progress dialog
         pd = new ProgressDialog(this);
         pd.setMessage("Loading");
         pd.show();
 
-
-        getMyUsers();
-    }
-
-    //get users we chatted with, display them in RV
-    private void getMyUsers(){
         myContactsIds.clear();
-        firestore.collection("Chatlist").document(mAuth.getUid()).collection("Contacted").orderBy("timestamp", Query.Direction.ASCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+
+        firestore.collection("Chatlist").document(mAuth.getUid()).collection("Contacted").orderBy("timestamp", Query.Direction.DESCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 if(queryDocumentSnapshots != null){
@@ -139,26 +139,35 @@ public class ChatListActivity extends AppCompatActivity {
     //method to create user obj by sending query with IDs in myContactsIds list
     private void loadChatList() {
         mUsers.clear();
-        firestore.collection("Users").whereIn("id", myContactsIds).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-            @Override
-            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                if(queryDocumentSnapshots != null){
-                    for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
-                        UserModel user= doc.toObject(UserModel.class);
-                        mUsers.add(user);
-                    }
-                    chatsAdapter.notifyDataSetChanged();
 
-                    //if no item found in the chatlist, show notFoundTV
-                    if(mUsers.size()==0){
-                        notFoundTV.setVisibility(View.VISIBLE);
-                    }else{
+        //whereIn() filter require non-empty list, otherwise it will crash
+        if(myContactsIds.size() != 0) {
+            firestore.collection("Users").whereIn("id", myContactsIds).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                @Override
+                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                    if (queryDocumentSnapshots != null) {
+                        for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                            UserModel user = doc.toObject(UserModel.class);
+                            mUsers.add(user);
+                        }
+                        //notify adapter
+                        chatsAdapter = new ChatListAdapter(ChatListActivity.this, mUsers);
+                        chatsRV.setAdapter(chatsAdapter);
+
+                        //set (No found TextView) visibility to gone
                         notFoundTV.setVisibility(View.GONE);
+
                     }
+                    pd.dismiss();
                 }
-                pd.dismiss();
-            }
-        });
+            });
+        }else{
+            //notify adapter if there is some change like deleting
+            chatsAdapter.notifyDataSetChanged();
+            //show (No found TextView)
+            notFoundTV.setVisibility(View.VISIBLE);
+            pd.dismiss();
+        }
     }
 
     //this method used to filter RV when typing in search field
