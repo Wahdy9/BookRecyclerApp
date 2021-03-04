@@ -150,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case R.id.nav_log_logout:
                         newMsgs = false;
-                        Toast.makeText(MainActivity.this, "logout from account", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "You logged out from your account", Toast.LENGTH_SHORT).show();
                         mAuth.signOut();
                         changesDrawerLayout();
                         populateRV(); //to refresh after sign out
@@ -301,12 +301,12 @@ public class MainActivity extends AppCompatActivity {
         //show in the filter option in the toolbar
         getSupportActionBar().setSubtitle( "Category:"+ selectedCategory+ ", Condition:" + selectedCondition);
 
-
         //send query to firestore DEPENDING of the filters, add the items them to recyclerview.
-        if(selectedCategory.equalsIgnoreCase("All") && //if both category and condition are All
+        if(selectedCategory.equalsIgnoreCase("All") &&
                 selectedCondition.equalsIgnoreCase("All")) {
-
-            firestore.collection("Items").orderBy("timePosted", Query.Direction.DESCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            //if both category and condition are All
+            firestore.collection("Items").orderBy("timePosted", Query.Direction.DESCENDING).get()
+                    .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                 @Override
                 public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
 
@@ -317,19 +317,18 @@ public class MainActivity extends AppCompatActivity {
                             itemList.add(item);
                         }
                         //notify adapter
-                        //itemAdapter.notifyDataSetChanged();
                         itemAdapter = new ItemAdapter(itemList);
                         itemRV.setAdapter(itemAdapter);
 
                         pd.dismiss();
                     }
-
                 }
             });
-        }else if(!selectedCategory.equalsIgnoreCase("All") && //if category is not All
+        }else if(!selectedCategory.equalsIgnoreCase("All") &&
                 selectedCondition.equalsIgnoreCase("All")){
-
-            firestore.collection("Items").whereEqualTo("category", selectedCategory).orderBy("timePosted", Query.Direction.DESCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            //if category is not All
+            firestore.collection("Items").whereEqualTo("category", selectedCategory)
+                    .orderBy("timePosted", Query.Direction.DESCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                 @Override
                 public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
 
@@ -340,20 +339,19 @@ public class MainActivity extends AppCompatActivity {
                             itemList.add(item);
                         }
                         //notify adapter
-                        //itemAdapter.notifyDataSetChanged();
                         itemAdapter = new ItemAdapter(itemList);
                         itemRV.setAdapter(itemAdapter);
 
                         pd.dismiss();
                     }
-
                 }
             });
 
-        }else if(selectedCategory.equalsIgnoreCase("All") &&  //if condition is not All
+        }else if(selectedCategory.equalsIgnoreCase("All") &&
                 !selectedCondition.equalsIgnoreCase("All")){
-
-            firestore.collection("Items").whereEqualTo("condition", selectedCondition).orderBy("timePosted", Query.Direction.DESCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            //if condition is not All
+            firestore.collection("Items").whereEqualTo("condition", selectedCondition)
+                    .orderBy("timePosted", Query.Direction.DESCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                 @Override
                 public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
 
@@ -364,19 +362,18 @@ public class MainActivity extends AppCompatActivity {
                             itemList.add(item);
                         }
                         //notify adapter
-                        //itemAdapter.notifyDataSetChanged();
                         itemAdapter = new ItemAdapter(itemList);
                         itemRV.setAdapter(itemAdapter);
 
                         pd.dismiss();
                     }
-
                 }
             });
 
-        }else{ //if both category and condition are not All
-
-            firestore.collection("Items").whereEqualTo("category", selectedCategory).whereEqualTo("condition", selectedCondition).orderBy("timePosted", Query.Direction.DESCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        }else{
+            //if both category and condition are not All
+            firestore.collection("Items").whereEqualTo("category", selectedCategory)
+                    .whereEqualTo("condition", selectedCondition).orderBy("timePosted", Query.Direction.DESCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                 @Override
                 public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
 
@@ -387,13 +384,11 @@ public class MainActivity extends AppCompatActivity {
                             itemList.add(item);
                         }
                         //notify adapter
-                        //itemAdapter.notifyDataSetChanged();
                         itemAdapter = new ItemAdapter(itemList);
                         itemRV.setAdapter(itemAdapter);
 
                         pd.dismiss();
                     }
-
                 }
             });
         }
@@ -411,7 +406,7 @@ public class MainActivity extends AppCompatActivity {
         Spinner conditionSpinner = view.findViewById(R.id.bottom_sheet_condition_spinner);
         Button applyBtn = view.findViewById(R.id.bottom_sheet_apply_btn);
 
-        //TODO:Move Constant class to Strings.xml and create the arrays here(DONE)
+        //spinner's values
         final String[] categories = getResources().getStringArray(R.array.spinner_category_search);
         final String[] conditions = getResources().getStringArray(R.array.spinner_condition_search);
 
@@ -567,11 +562,8 @@ public class MainActivity extends AppCompatActivity {
     }
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.option_language) {
-            //change language here
 
-
-        }else if(item.getItemId() == R.id.option_notification){
+         if(item.getItemId() == R.id.option_notification){
             //Go to notification settings
             sendToNotificationSettings();
         }

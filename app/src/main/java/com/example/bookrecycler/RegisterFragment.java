@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -68,69 +69,7 @@ public class RegisterFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                //check if data is entered correctly
-                if (!validateEmail() | !validateUsername() | !validatePassword() | !validatePhone()) {
-                    return;
-                }
-
-                //get data
-                final String name = usernameET.getEditText().getText().toString();
-                final String email = emailET.getEditText().getText().toString();
-                final String phone = phoneET.getEditText().getText().toString().trim();
-                String pass = passwordET.getEditText().getText().toString();
-
-                //display progress bar
-                progressBar.setVisibility(View.VISIBLE);
-                getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);//to disable user interaction
-
-                //create the user in the database
-                mAuth.createUserWithEmailAndPassword(email, pass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            //account created, upload data to firestore
-                            Map<String, Object> userMap = new HashMap<>();
-                            userMap.put("id", mAuth.getCurrentUser().getUid());
-                            userMap.put("name", name);
-                            userMap.put("email", email);
-                            userMap.put("phone", phone);
-                            userMap.put("major", "");
-                            userMap.put("showPhone", true);
-                            userMap.put("showEmail", true);
-                            userMap.put("img_url", "default");
-                            firestore.collection("Users").document(mAuth.getCurrentUser().getUid()).set(userMap).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-                                    //data uploaded successfully to firestore
-                                    Toast.makeText(getActivity(), "Your Account Created Successfully", Toast.LENGTH_LONG).show();
-                                    //hide progress bar
-                                    progressBar.setVisibility(View.GONE);
-                                    getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                                    getActivity().finish();
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    //error when uploading data to firestore
-                                    Toast.makeText(getActivity(), "ERROR: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                                    //hide progress bar
-                                    progressBar.setVisibility(View.GONE);
-                                    getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                                }
-                            });
-
-
-                        } else {
-                            //error with account creation
-                            Toast.makeText(getActivity(), "ERROR: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
-                            //hide progress bar
-                            progressBar.setVisibility(View.GONE);
-                            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                        }
-                    }
-                });
-
+                register();
 
             }
         });
@@ -138,10 +77,78 @@ public class RegisterFragment extends Fragment {
         return view;
     }
 
+    private void register(){
+        //check if data is entered correctly
+        if (!validateEmail() | !validateUsername() | !validatePassword() | !validatePhone()) {
+            return;
+        }
+
+        //get data
+        final String name = usernameET.getEditText().getText().toString();
+        final String email = emailET.getEditText().getText().toString();
+        final String phone = phoneET.getEditText().getText().toString().trim();
+        String pass = passwordET.getEditText().getText().toString();
+
+        //display progress bar
+        progressBar.setVisibility(View.VISIBLE);
+        getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);//to disable user interaction
+
+        //create the user in the database
+        mAuth.createUserWithEmailAndPassword(email, pass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
+                    //account created, upload data to firestore
+                    //create map
+                    Map<String, Object> userMap = new HashMap<>();
+                    userMap.put("id", mAuth.getCurrentUser().getUid());
+                    userMap.put("name", name);
+                    userMap.put("email", email);
+                    userMap.put("phone", phone);
+                    userMap.put("major", "");
+                    userMap.put("showPhone", true);
+                    userMap.put("showEmail", true);
+                    userMap.put("img_url", "default");
+                    //upload to firestore
+                    firestore.collection("Users").document(mAuth.getCurrentUser().getUid())
+                            .set(userMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            //data uploaded successfully to firestore
+                            Toast.makeText(getActivity(), "Your Account Created Successfully",
+                                    Toast.LENGTH_LONG).show();
+                            //hide progress bar
+                            progressBar.setVisibility(View.GONE);
+                            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                            getActivity().finish();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            //error when uploading data to firestore
+                            Toast.makeText(getActivity(), "Something went wrong\n  please try again later" ,
+                                    Toast.LENGTH_LONG).show();
+                            Log.d("RegisterFragment", "onFailure(Uploading to firestore): " + e.getMessage());
+                            //hide progress bar
+                            progressBar.setVisibility(View.GONE);
+                            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                        }
+                    });
+                } else {
+                    //error with account creation
+                    Toast.makeText(getActivity(), ""+task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                    //hide progress bar
+                    progressBar.setVisibility(View.GONE);
+                    getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                }
+            }
+        });
+    }
 
 
     //Validation methods
-    boolean validateEmail() {
+    private boolean validateEmail() {
         String email = emailET.getEditText().getText().toString().trim();
 
         if (email.isEmpty()) {
@@ -157,7 +164,7 @@ public class RegisterFragment extends Fragment {
         }
     }
 
-    boolean validateUsername() {
+    private boolean validateUsername() {
         String username = usernameET.getEditText().getText().toString().trim();
 
         if (username.isEmpty()) {
@@ -172,7 +179,7 @@ public class RegisterFragment extends Fragment {
         }
     }
 
-    boolean validatePhone() {
+    private boolean validatePhone() {
         String phone = phoneET.getEditText().getText().toString().trim();
 
         if (phone.isEmpty()) {
@@ -184,7 +191,7 @@ public class RegisterFragment extends Fragment {
         }
     }
 
-    boolean validatePassword() {
+    private boolean validatePassword() {
         String password = passwordET.getEditText().getText().toString().trim();
         String confirmPass = password2ET.getEditText().getText().toString().trim();
 

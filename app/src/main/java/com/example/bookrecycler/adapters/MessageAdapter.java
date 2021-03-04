@@ -117,13 +117,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
                             Toast.makeText(mContext, "Can't open\nyou don't have google map installed", Toast.LENGTH_LONG).show();
                         }
                     } catch (Exception e) {
-                        Toast.makeText(mContext, "Execption: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(mContext, "Something went wrong\n  please try again later", Toast.LENGTH_LONG).show();
+                        Log.d("MessageAdapter", "onClick(myLocationIV): " + e.getMessage());
                     }
                 }
             });
         }else if(msg.isImage()){
             //if msg is an image
-            System.out.println("*****************MsgAdapter-inside is a image-  latitude= " + msg.getGeoPoint().getLatitude() +"Longtitude= " + msg.getGeoPoint().getLongitude());
 
         }else{
             //if msg is just a text

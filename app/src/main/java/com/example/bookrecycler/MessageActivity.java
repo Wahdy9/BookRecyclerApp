@@ -153,7 +153,8 @@ public class MessageActivity extends AppCompatActivity {
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Toast.makeText(MessageActivity.this, "error:" + e.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(MessageActivity.this, "Something went wrong\n  please try again later" , Toast.LENGTH_LONG).show();
+                Log.d("MessageActivity", "onFailure(Loading reciever info): " +  e.getMessage());
             }
         });
 
@@ -204,7 +205,7 @@ public class MessageActivity extends AppCompatActivity {
 
     }
 
-    //this method get the current location(Latitude and longitutde) and call sendlocation()
+    //this method get the current location(Latitude and longitude) and call sendLocation()
     private void getCurrentLocation() {
         //check if GPS on
         if(locationEnabled()){
@@ -219,11 +220,13 @@ public class MessageActivity extends AppCompatActivity {
             locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
             //send location request
-            LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(locationRequest, new LocationCallback(){
+            LocationServices.getFusedLocationProviderClient(this)
+                    .requestLocationUpdates(locationRequest, new LocationCallback(){
                 @Override
                 public void onLocationResult(LocationResult locationResult) {
                     super.onLocationResult(locationResult);
-                    LocationServices.getFusedLocationProviderClient(MessageActivity.this).removeLocationUpdates(this);
+                    LocationServices.getFusedLocationProviderClient(MessageActivity.this).
+                            removeLocationUpdates(this);
 
                     if(locationResult != null && locationResult.getLocations().size() > 0){
                         int latestLocationIndex = locationResult.getLocations().size() -1;
@@ -254,7 +257,6 @@ public class MessageActivity extends AppCompatActivity {
 
     //upload the location to firestore and add entries in chatList if not exist
     private void sendLocation(final String sender, final String receiver, double latitude, double longitude) {
-
         //generate random id for the msg
         final DocumentReference msgRef = firestore.collection("Chats").document();
         final String msgId = msgRef.getId();
@@ -272,11 +274,13 @@ public class MessageActivity extends AppCompatActivity {
         msgMap.put("geoPoint", new GeoPoint(latitude,longitude));
 
         //upload to firestore to Chats
-        firestore.collection("Chats").document(msgId).set(msgMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+        firestore.collection("Chats").document(msgId).set(msgMap)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 pd.dismiss();
-                firestore.collection("Users").document(sender).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                firestore.collection("Users").document(sender).get()
+                        .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
                         String username = ""+ documentSnapshot.getString("name");
@@ -293,18 +297,20 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 
-        //upload info about sender and reciever to DB-> Chatlist, so these users will aprear in chatListActivity
+        //upload info about sender and reciever to DB-> Chatlist, so these users will appear in chatListActivity
         Map<String, Object> senderMap = new HashMap<>();
         senderMap.put("id", receiver);
         senderMap.put("newMsgs",false);
         senderMap.put("timestamp", new Timestamp(new Date()));
-        firestore.collection("Chatlist").document(sender).collection("Contacted").document(receiver).set(senderMap);
+        firestore.collection("Chatlist").document(sender).collection("Contacted")
+                .document(receiver).set(senderMap);
 
         Map<String, Object> receiverMap = new HashMap<>();
         receiverMap.put("id", sender);
         receiverMap.put("newMsgs",true);//so when reciever logged in the badge will show.
         receiverMap.put("timestamp", new Timestamp(new Date()));
-        firestore.collection("Chatlist").document(receiver).collection("Contacted").document(sender).set(receiverMap);
+        firestore.collection("Chatlist").document(receiver).collection("Contacted")
+                .document(sender).set(receiverMap);
     }
 
     //this method check if GPS is on or off, return true if on, false otherwise
@@ -347,10 +353,12 @@ public class MessageActivity extends AppCompatActivity {
         msgMap.put("geoPoint", new GeoPoint(0,0));
 
         //upload to firestore to Chats
-        firestore.collection("Chats").document(msgId).set(msgMap).addOnSuccessListener(new OnSuccessListener<Void>() {
+        firestore.collection("Chats").document(msgId).set(msgMap)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                firestore.collection("Users").document(sender).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                firestore.collection("Users").document(sender).get()
+                        .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
                         String username = ""+ documentSnapshot.getString("name");
@@ -362,18 +370,20 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
 
-        //upload info about sender and reciever to DB-> Chatlist, so these users will aprear in chatListActivity
+        //upload info about sender and reciever to DB-> Chatlist, so these users will appear in chatListActivity
         Map<String, Object> senderMap = new HashMap<>();
         senderMap.put("id", receiver);
         senderMap.put("newMsgs",false);
         senderMap.put("timestamp", new Timestamp(new Date()));
-        firestore.collection("Chatlist").document(sender).collection("Contacted").document(receiver).set(senderMap);
+        firestore.collection("Chatlist").document(sender).collection("Contacted")
+                .document(receiver).set(senderMap);
 
         Map<String, Object> receiverMap = new HashMap<>();
         receiverMap.put("id", sender);
         receiverMap.put("newMsgs",true);//so when reciever logged in the badge will show.
         receiverMap.put("timestamp", new Timestamp(new Date()));
-        firestore.collection("Chatlist").document(receiver).collection("Contacted").document(sender).set(receiverMap);
+        firestore.collection("Chatlist").document(receiver).collection("Contacted"
+        ).document(sender).set(receiverMap);
     }
 
     //load msgs from firestore
@@ -419,14 +429,16 @@ public class MessageActivity extends AppCompatActivity {
                 }
 
                 Token token = documentSnapshot.toObject(Token.class);
-                Data data = new Data(""+mAuth.getUid(), ""+username +": "+message, "New Message", ""+receiver,"ChatNotification" ,R.drawable.book_recycler_logo);
+                Data data = new Data(""+mAuth.getUid(), ""+username +": "+message, "New Message",
+                        ""+receiver,"ChatNotification" ,R.drawable.book_recycler_logo);
 
                 Sender sender = new Sender(data, token.getToken());
 
                 //send the notification to cloud messaging,fcm json object request
                 try {
                     JSONObject senderJsonObj = new JSONObject(new Gson().toJson(sender));
-                    JsonObjectRequest jsonObjectRequest = new JsonObjectRequest("https://fcm.googleapis.com/fcm/send", senderJsonObj, new Response.Listener<JSONObject>() {
+                    JsonObjectRequest jsonObjectRequest = new JsonObjectRequest("https://fcm.googleapis.com/fcm/send",
+                            senderJsonObj, new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
                             //response of the request
@@ -456,7 +468,6 @@ public class MessageActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
             }
         });
     }
