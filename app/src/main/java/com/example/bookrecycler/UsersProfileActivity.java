@@ -242,7 +242,7 @@ public class UsersProfileActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if(!task.isSuccessful()){
-                    Toast.makeText(UsersProfileActivity.this, "Something went wrong\nplease try again later" , Toast.LENGTH_LONG).show();
+                    Toast.makeText(UsersProfileActivity.this, "Something went wrong\n  please try again later" , Toast.LENGTH_LONG).show();
                     Log.d("UsersProfileActivity", "onComplete: " + task.getException().getMessage());
                     return;
                 }

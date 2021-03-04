@@ -224,7 +224,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
             public void onFailure(@NonNull Exception e) {
                 //fail to delete img
                 pd.dismiss();
-                Toast.makeText(mContext, "Something went wrong\nplease try again later", Toast.LENGTH_LONG).show();
+                Toast.makeText(mContext, "Something went wrong\n  please try again later", Toast.LENGTH_LONG).show();
                 Log.d("ItemAdapter", "onFailure(Delete image): " + e.getMessage());
             }
         });

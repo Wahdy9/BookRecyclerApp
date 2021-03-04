@@ -127,7 +127,7 @@ public class RegisterFragment extends Fragment {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             //error when uploading data to firestore
-                            Toast.makeText(getActivity(), "Something went wrong\nplease try again later" ,
+                            Toast.makeText(getActivity(), "Something went wrong\n  please try again later" ,
                                     Toast.LENGTH_LONG).show();
                             Log.d("RegisterFragment", "onFailure(Uploading to firestore): " + e.getMessage());
                             //hide progress bar

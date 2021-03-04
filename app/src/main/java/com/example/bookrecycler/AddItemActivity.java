@@ -247,7 +247,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                     finish();
                                                 } else {
                                                     //error with firestore
-                                                    Toast.makeText(AddItemActivity.this, "Something went wrong\nplease try again later" , Toast.LENGTH_LONG).show();
+                                                    Toast.makeText(AddItemActivity.this, "Something went wrong\n  please try again later" , Toast.LENGTH_LONG).show();
                                                     Log.d("AddItemActivity", "onComplete(Upload to firestore): " + task.getException().getMessage());
                                                 }
                                                 pd.dismiss();
@@ -262,7 +262,7 @@ public class AddItemActivity extends AppCompatActivity {
                 }catch (IOException e) {
                     //compress image exception
                     pd.dismiss();
-                    Toast.makeText(AddItemActivity.this, "Something went wrong\nplease try again later", Toast.LENGTH_LONG).show();
+                    Toast.makeText(AddItemActivity.this, "Something went wrong\n  please try again later", Toast.LENGTH_LONG).show();
                     Log.d("AddItemActivity", "Compress error: " + e.getMessage());
                 }
 
@@ -287,7 +287,7 @@ public class AddItemActivity extends AppCompatActivity {
                             finish();
                         } else {
                             //error with firestore
-                            Toast.makeText(AddItemActivity.this, "Something went wrong\nplease try again later" , Toast.LENGTH_LONG).show();
+                            Toast.makeText(AddItemActivity.this, "Something went wrong\n  please try again later" , Toast.LENGTH_LONG).show();
                             Log.d("AddItemActivity", "onComplete(Upload to firestore): " + task.getException().getMessage());
                         }
                         pd.dismiss();
@@ -368,7 +368,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                     finish();
                                                 } else {
                                                     //error with firestore
-                                                    Toast.makeText(AddItemActivity.this, "Something went wrong\nplease try again later" , Toast.LENGTH_LONG).show();
+                                                    Toast.makeText(AddItemActivity.this, "Something went wrong\n  please try again later" , Toast.LENGTH_LONG).show();
                                                     Log.d("AddItemActivity", "onComplete(Upload to firestore): " + task.getException().getMessage());
                                                 }
                                                 pd.dismiss();
@@ -380,7 +380,7 @@ public class AddItemActivity extends AppCompatActivity {
                             } else {
                                 //error with storage
                                 pd.dismiss();
-                                Toast.makeText(AddItemActivity.this, "Something went wrong\nplease try again later", Toast.LENGTH_LONG).show();
+                                Toast.makeText(AddItemActivity.this, "Something went wrong\n  please try again later", Toast.LENGTH_LONG).show();
                                 Log.d("AddItemActivity", "onComplete(Storage error): " + task.getException().getMessage());
                             }
                         }
@@ -389,7 +389,7 @@ public class AddItemActivity extends AppCompatActivity {
                 }catch (IOException e) {
                     //compress image exception
                     pd.dismiss();
-                    Toast.makeText(AddItemActivity.this, "Something went wrong\nplease try again later", Toast.LENGTH_LONG).show();
+                    Toast.makeText(AddItemActivity.this, "Something went wrong\n  please try again later", Toast.LENGTH_LONG).show();
                     Log.d("AddItemActivity", "Compress error: " + e.getMessage());
                 }
             }else{

@@ -562,11 +562,8 @@ public class MainActivity extends AppCompatActivity {
     }
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.option_language) {
-            //change language here
 
-
-        }else if(item.getItemId() == R.id.option_notification){
+         if(item.getItemId() == R.id.option_notification){
             //Go to notification settings
             sendToNotificationSettings();
         }

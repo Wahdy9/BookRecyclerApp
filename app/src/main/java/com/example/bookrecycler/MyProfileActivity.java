@@ -295,7 +295,7 @@ public class MyProfileActivity extends AppCompatActivity {
                     Toast.makeText(MyProfileActivity.this, "Profile Updated Successfully!", Toast.LENGTH_LONG).show();
                     MainActivity.refreshMainActivity = true;//to refresh the MainActivity
                 }else{
-                    Toast.makeText(MyProfileActivity.this, "Something went wrong\nplease try again later", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MyProfileActivity.this, "Something went wrong\n  please try again later", Toast.LENGTH_LONG).show();
                     Log.d("MyProfileActivity", "onComplete(Upload to firestore): " + task.getException().getMessage());
                 }
                 pd.dismiss();

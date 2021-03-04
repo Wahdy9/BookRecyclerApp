@@ -269,8 +269,9 @@ public class LoginFragment extends Fragment {
                 firebaseAuthWithGoogle(account.getIdToken());
             } catch (ApiException e) {
                 // Google Sign In failed, update UI appropriately
-                Toast.makeText(getActivity(), "Something went wrong\nplease try again later" , Toast.LENGTH_LONG).show();
-                Log.d("LoginFragment", "onFailure(Google signin): " + e.getMessage());            }
+                Toast.makeText(getActivity(), "please check your connection" , Toast.LENGTH_SHORT).show();
+                Log.d("LoginFragment", "onFailure(Google signin): " + e.getMessage());
+            }
         }
     }
 
@@ -320,7 +321,7 @@ public class LoginFragment extends Fragment {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
                                     //error when uploading data to firestore
-                                    Toast.makeText(getActivity(), "Something went wrong\nplease try again later" , Toast.LENGTH_LONG).show();
+                                    Toast.makeText(getActivity(), "Something went wrong\n  please try again later" , Toast.LENGTH_LONG).show();
                                     Log.d("LoginFragment", "onFailure: " + e.getMessage());
                                 }
                             });

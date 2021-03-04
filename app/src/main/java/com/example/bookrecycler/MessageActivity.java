@@ -153,7 +153,7 @@ public class MessageActivity extends AppCompatActivity {
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Toast.makeText(MessageActivity.this, "Something went wrong\nplease try again later" , Toast.LENGTH_LONG).show();
+                Toast.makeText(MessageActivity.this, "Something went wrong\n  please try again later" , Toast.LENGTH_LONG).show();
                 Log.d("MessageActivity", "onFailure(Loading reciever info): " +  e.getMessage());
             }
         });
