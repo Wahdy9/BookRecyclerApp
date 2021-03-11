@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -84,10 +85,16 @@ public class ChatListActivity extends AppCompatActivity {
                     public void run() {
                         //stop refreshing
                         refreshLayout.setRefreshing(false);
+
                         //repopulate recycler view
-                        getMyUsers();
+                        try{
+                            getMyUsers();
+                        }catch (Exception e){
+                            Log.d("ChatListActivity", "run: " + e.getMessage());
+                        }
+
                     }
-                }, 3000);
+                }, 2000);
             }
         });
 

@@ -26,6 +26,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.example.bookrecycler.AddItemActivity;
 import com.example.bookrecycler.ItemDetailsActivity;
 import com.example.bookrecycler.MainActivity;
+import com.example.bookrecycler.MyItemsActivity;
 import com.example.bookrecycler.R;
 import com.example.bookrecycler.models.ItemModel;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -209,9 +210,17 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
                 firestore.collection("Items").document(itemId).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        //refresh the RV in the Main Activity
+
+                        //refresh the RV in the Main Activity or MyItemActivity
                         if (mContext instanceof MainActivity) {
+
                             ((MainActivity)mContext).populateRV();
+                            MyItemsActivity.refreshMyItemsActivity = true;
+
+                        }else if(mContext instanceof MyItemsActivity){
+
+                            ((MyItemsActivity)mContext).populateRV();
+                            MainActivity.refreshMainActivity = true;
                         }
 
                         Toast.makeText(mContext, "Deleted Successfully", Toast.LENGTH_SHORT).show();
