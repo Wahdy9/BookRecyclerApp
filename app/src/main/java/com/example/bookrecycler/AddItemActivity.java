@@ -196,7 +196,8 @@ public class AddItemActivity extends AppCompatActivity {
         //check if values not empty
         if(!TextUtils.isEmpty(title) && !TextUtils.isEmpty(price) && !TextUtils.isEmpty(description)){
             final ProgressDialog pd = new ProgressDialog(this);
-            pd.setMessage("Updating");
+            pd.setMessage("Updating");//so user can't update same item multiple time
+            pd.setCancelable(false);
             pd.show();
 
             //check if user picked newer image
@@ -315,6 +316,7 @@ public class AddItemActivity extends AppCompatActivity {
             if(image_uri != null) {
                 final ProgressDialog pd = new ProgressDialog(this);
                 pd.setMessage("Uploading");
+                pd.setCancelable(false);//so user can't upload same item multiple time
                 pd.show();
 
                 //get random itemID

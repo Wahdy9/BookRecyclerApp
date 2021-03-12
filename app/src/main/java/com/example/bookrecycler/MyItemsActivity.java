@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -93,10 +94,16 @@ public class MyItemsActivity extends AppCompatActivity {
                     public void run() {
                         //stop refreshing
                         refreshLayout.setRefreshing(false);
+
                         //repopulate recycler view
-                        populateRV();
+                        try {
+                            populateRV();
+                        }catch (Exception e){
+                            Log.d("MyItemsActivity", "run: " + e.getMessage());
+                        }
+
                     }
-                }, 3000);
+                }, 2000);
             }
         });
 
@@ -142,7 +149,7 @@ public class MyItemsActivity extends AppCompatActivity {
     }
 
     //get items from fireStore, add them to recyclerView.
-    private void populateRV() {
+    public void populateRV() {
 
         //show progress dialog
         pd = new ProgressDialog(this);
