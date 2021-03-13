@@ -93,6 +93,12 @@ public class LoginFragment extends Fragment {
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //check Internet
+                if(!Utils.isConnectedToInternet(getContext())){
+                    Toast.makeText(getContext(), "Check your Internet connection", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 //check if data entered is correct
                 if (!validateEmail() | !validatePassword()) {
                     return;
@@ -110,6 +116,12 @@ public class LoginFragment extends Fragment {
         googleSigninBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //check Internet
+                if(!Utils.isConnectedToInternet(getContext())){
+                    Toast.makeText(getContext(), "Check your Internet connection", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 Intent signInIntent = mGoogleSignInClient.getSignInIntent();
                 startActivityForResult(signInIntent, RC_SIGN_IN);
             }
@@ -152,7 +164,7 @@ public class LoginFragment extends Fragment {
     }
 
 
-    //display dialog for user email
+    //display dialog for user email recovery
     private void showRecoverPasswordDialog() {
         //build alert dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
@@ -177,6 +189,12 @@ public class LoginFragment extends Fragment {
         builder.setPositiveButton("Recover", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                //check Internet
+                if(!Utils.isConnectedToInternet(getContext())){
+                    Toast.makeText(getContext(), "Check your Internet connection", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 //input data
                 String email = mEmail.getText().toString().trim();
                 beginRecover(email);
@@ -194,9 +212,11 @@ public class LoginFragment extends Fragment {
         //show dialog
         builder.create().show();
     }
+
     //recover password
     private void beginRecover(String email) {
 
+        //show progress bar
         progressBar.setVisibility(View.VISIBLE);
         getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);//to disable user interaction
@@ -237,7 +257,6 @@ public class LoginFragment extends Fragment {
 
         } else {
             emailET.setError(null);
-            // emailET.setErrorEnabled(false);//to remove the space for error
             return true;
         }
     }

@@ -216,6 +216,12 @@ public class MyProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                //check Internet
+                if(!Utils.isConnectedToInternet(MyProfileActivity.this)){
+                    Toast.makeText(MyProfileActivity.this, "Check your Internet connection", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 //get data
                 String name = usernameET.getText().toString().trim();
                 String phone = phoneET.getText().toString().trim();
@@ -337,6 +343,12 @@ public class MyProfileActivity extends AppCompatActivity {
         changeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                //check Internet
+                if(!Utils.isConnectedToInternet(MyProfileActivity.this)){
+                    Toast.makeText(MyProfileActivity.this, "Check your Internet connection", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
                 //validate password
                 if(!validatePassword()){

@@ -86,7 +86,7 @@ public class MessageActivity extends AppCompatActivity {
     private FirebaseFirestore firestore;
     public ListenerRegistration registration;//for firestore snapshat listner, so we can deattatch it from adapter to refresh RV
 
-    //received from previous activity, used to load info of that user + msgs
+    //received from previous activity or notification, used to load info of that user + msgs
     String userId;
 
     //Recyclerview
@@ -419,6 +419,7 @@ public class MessageActivity extends AppCompatActivity {
         });
     }
 
+    //method to send notification
     private void sendNotification(final String receiver, final String username, final String message) {
         firestore.collection("Tokens").document(receiver).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
@@ -434,7 +435,7 @@ public class MessageActivity extends AppCompatActivity {
 
                 Sender sender = new Sender(data, token.getToken());
 
-                //send the notification to cloud messaging,fcm json object request
+                //send the notification to cloud messaging, fcm json object request
                 try {
                     JSONObject senderJsonObj = new JSONObject(new Gson().toJson(sender));
                     JsonObjectRequest jsonObjectRequest = new JsonObjectRequest("https://fcm.googleapis.com/fcm/send",

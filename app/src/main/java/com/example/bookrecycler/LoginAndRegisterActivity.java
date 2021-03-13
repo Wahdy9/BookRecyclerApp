@@ -35,6 +35,7 @@ public class LoginAndRegisterActivity extends AppCompatActivity {
         });
 
 
+        //setup the viewPager
         final TabLayout tabLayout = findViewById(R.id.tab_layout);
         final ViewPager viewPager = findViewById(R.id.view_pager);
 
@@ -45,10 +46,9 @@ public class LoginAndRegisterActivity extends AppCompatActivity {
         viewPager.setAdapter(viewPagerAdapter);
         tabLayout.setupWithViewPager(viewPager);
 
-
-
     }
 
+    //Adapter for viewPager
     class ViewPagerAdapter extends FragmentPagerAdapter {
 
         private ArrayList<Fragment> fragments;

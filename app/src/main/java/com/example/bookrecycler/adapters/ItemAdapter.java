@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -28,6 +27,7 @@ import com.example.bookrecycler.ItemDetailsActivity;
 import com.example.bookrecycler.MainActivity;
 import com.example.bookrecycler.MyItemsActivity;
 import com.example.bookrecycler.R;
+import com.example.bookrecycler.Utils;
 import com.example.bookrecycler.models.ItemModel;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -40,9 +40,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.TimeZone;
 
 import javax.annotation.Nullable;
 
@@ -95,13 +93,9 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
         });
 
         //format and set time
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-
         long time = itemModel.getTimePosted().getTime();
-        long now = System.currentTimeMillis();
-        CharSequence ago = DateUtils.getRelativeTimeSpanString(time, now, DateUtils.MINUTE_IN_MILLIS);
-        holder.timeTV.setText(ago);
+        CharSequence timePassed = Utils.getTimePassed(time);
+        holder.timeTV.setText(timePassed);
 
         //get comment counts
         firestore.collection("Items").document(itemModel.getItemId()).collection("Comments").addSnapshotListener(new EventListener<QuerySnapshot>() {
@@ -153,6 +147,13 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
                                                     //if yes, begin the delete
+                                                    //check Internet first
+                                                    if(!Utils.isConnectedToInternet(mContext)){
+                                                        Toast.makeText(mContext, "Check your Internet connection", Toast.LENGTH_SHORT).show();
+                                                        return;
+                                                    }
+
+                                                    //start deleting the item
                                                     beginDelete(itemModel.getItemId(), itemModel.getItemImg());
                                                 }
                                             }).setNegativeButton(android.R.string.no, null).show();
