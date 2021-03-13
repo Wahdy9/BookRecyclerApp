@@ -159,13 +159,13 @@ public class MyItemsActivity extends AppCompatActivity {
                         ItemModel post = doc.toObject(ItemModel.class);
                         itemList.add(post);
                     }
-                    itemAdapter.notifyDataSetChanged();
+                    itemAdapter.notifyDataSetChanged();//try to change to the other notifyer is better
 
                     //if no item found in the favorite, show notFoundTV
                     if(itemList.size()==0){
                         notFoundTV.setVisibility(View.VISIBLE);
                     }else{
-                        notFoundTV.setVisibility(View.GONE);
+                        notFoundTV.setVisibility(View.GONE);// no need for this
                     }
                 }
                 pd.dismiss();

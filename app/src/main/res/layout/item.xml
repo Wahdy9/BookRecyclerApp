@@ -103,10 +103,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="33dp"
-            android:tint="#c0c0c0"
             app:layout_constraintEnd_toStartOf="@+id/categoryLB"
             app:layout_constraintTop_toBottomOf="@+id/titleLB"
-            app:srcCompat="@drawable/ic_book" />
+            app:srcCompat="@drawable/ic_book"
+            app:tint="#c0c0c0" />
 
         <TextView
             android:id="@+id/categoryLB"
@@ -124,10 +124,10 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:visibility="gone"
-            android:tint="@android:color/black"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_more_vert" />
+            app:srcCompat="@drawable/ic_more_vert"
+            app:tint="@android:color/black" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
