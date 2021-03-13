@@ -214,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
                         //refresh activity
                         refreshActivity();
                     }
-                }, 3000);
+                }, 2000);
             }
         });
 
