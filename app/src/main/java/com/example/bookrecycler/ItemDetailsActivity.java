@@ -151,23 +151,28 @@ public class ItemDetailsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(mAuth.getCurrentUser() != null){
-                    //if user logged, favor or unfavor the item
-                    if ((Integer) favoriteIV.getTag() == R.drawable.ic_favorite_grey) {
-                        //Favor the item, create a document in favorites and change the icon
-                        HashMap<String, Object> map = new HashMap<>();
-                        map.put("itemId", item.getItemId());
-                        firestore.collection("Users").document(mAuth.getUid()).collection("Favorites")
-                                .document(item.getItemId()).set(map);
-                        favoriteIV.setImageResource(R.drawable.ic_favorite_red);
-                        favoriteIV.setTag(R.drawable.ic_favorite_red);//tag used in (if), to compare the icon
-                        Toast.makeText(ItemDetailsActivity.this, "Item added to favorite", Toast.LENGTH_SHORT).show();
-                    } else {
-                        //unfavor the item, delete a document in favorites and change the icon
-                        firestore.collection("Users").document(mAuth.getUid()).collection("Favorites")
-                                .document(item.getItemId()).delete();
-                        favoriteIV.setImageResource(R.drawable.ic_favorite_grey);
-                        favoriteIV.setTag(R.drawable.ic_favorite_grey);
-                        Toast.makeText(ItemDetailsActivity.this, "Item removed from favorite", Toast.LENGTH_SHORT).show();
+                    //this try to avoid crash when favorite clicked and there is no Internet
+                    try {
+                        //if user logged, favor or unfavor the item
+                        if ((Integer) favoriteIV.getTag() == R.drawable.ic_favorite_grey) {
+                            //Favor the item, create a document in favorites and change the icon
+                            HashMap<String, Object> map = new HashMap<>();
+                            map.put("itemId", item.getItemId());
+                            firestore.collection("Users").document(mAuth.getUid()).collection("Favorites")
+                                    .document(item.getItemId()).set(map);
+                            favoriteIV.setImageResource(R.drawable.ic_favorite_red);
+                            favoriteIV.setTag(R.drawable.ic_favorite_red);//tag used in (if), to compare the icon
+                            Toast.makeText(ItemDetailsActivity.this, "Item added to favorite", Toast.LENGTH_SHORT).show();
+                        } else {
+                            //unfavor the item, delete a document in favorites and change the icon
+                            firestore.collection("Users").document(mAuth.getUid()).collection("Favorites")
+                                    .document(item.getItemId()).delete();
+                            favoriteIV.setImageResource(R.drawable.ic_favorite_grey);
+                            favoriteIV.setTag(R.drawable.ic_favorite_grey);
+                            Toast.makeText(ItemDetailsActivity.this, "Item removed from favorite", Toast.LENGTH_SHORT).show();
+                        }
+                    }catch (NullPointerException e){
+                        Toast.makeText(ItemDetailsActivity.this, "Check your Internet connection", Toast.LENGTH_SHORT).show();
                     }
                 }else{
                     //if not logged , send to login activity
@@ -223,6 +228,12 @@ public class ItemDetailsActivity extends AppCompatActivity {
     }
 
     private void sendComment(String itemId) {
+        //check Internet
+        if(!Utils.isConnectedToInternet(ItemDetailsActivity.this)){
+            Toast.makeText(ItemDetailsActivity.this, "Check your Internet connection", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         //get the comment and check if empty
         String comment = commentET.getText().toString().trim();
         if (!TextUtils.isEmpty(comment)) {

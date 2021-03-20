@@ -1,7 +1,6 @@
 package com.example.bookrecycler.adapters;
 
 import android.content.Context;
-import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,23 +12,24 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.bookrecycler.R;
+import com.example.bookrecycler.Utils;
 import com.example.bookrecycler.models.CommentModel;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.TimeZone;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHolder> {
 
 
+    //list to populate
     private ArrayList<CommentModel> commentList;
     private Context mContext;
 
+    //firebase
     private FirebaseFirestore firestore;
 
 
@@ -74,13 +74,9 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
         });
 
         //format and set the time
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-
         long time = commentModel.getTimestamp().toDate().getTime();
-        long now = System.currentTimeMillis();
-        CharSequence ago = DateUtils.getRelativeTimeSpanString(time, now, DateUtils.MINUTE_IN_MILLIS);
-        holder.timeTV.setText(ago);
+        CharSequence timePassed = Utils.getTimePassed(time);
+        holder.timeTV.setText(timePassed);
     }
 
     @Override

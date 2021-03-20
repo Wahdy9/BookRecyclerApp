@@ -60,6 +60,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
 
+        //get the user
         final UserModel user = userList.get(position);
 
         //set username
