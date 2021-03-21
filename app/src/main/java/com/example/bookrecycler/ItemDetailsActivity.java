@@ -241,7 +241,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
             String commentId = firestore.collection("Items").document(itemId).collection("Comments").document().getId();
 
             //make the comment objext and send to firestore
-            final CommentModel commentToSent = new CommentModel( FirebaseAuth.getInstance().getUid(), commentId, comment, new Timestamp(new Date()));
+            final CommentModel commentToSent = new CommentModel( FirebaseAuth.getInstance().getUid(), commentId, comment, new Timestamp(new Date()), itemId);
             firestore.collection("Items").document(itemId).collection("Comments").document(commentId).set(commentToSent).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
