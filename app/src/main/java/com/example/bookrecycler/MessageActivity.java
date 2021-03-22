@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Looper;
+import android.os.Message;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
@@ -86,7 +87,7 @@ public class MessageActivity extends AppCompatActivity {
     private FirebaseFirestore firestore;
     public ListenerRegistration registration;//for firestore snapshat listner, so we can deattatch it from adapter to refresh RV
 
-    //received from previous activity, used to load info of that user + msgs
+    //received from previous activity or notification, used to load info of that user + msgs
     String userId;
 
     //Recyclerview
@@ -176,6 +177,13 @@ public class MessageActivity extends AppCompatActivity {
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                //check Internet
+                if(!Utils.isConnectedToInternet(MessageActivity.this)){
+                    Toast.makeText(MessageActivity.this, "Check your Internet connection", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 String msg = msgET.getText().toString();
                 if (!msg.equals("")) {
                     sendMessage(mAuth.getUid(), userId, msg);
@@ -190,6 +198,7 @@ public class MessageActivity extends AppCompatActivity {
         gpsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //check if location permission is granted
                 if(ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
                     ActivityCompat.requestPermissions(
                             MessageActivity.this,
@@ -197,6 +206,13 @@ public class MessageActivity extends AppCompatActivity {
                             LOCATION_REQUEST_CODE
                     );
                 }else{
+
+                    //check Internet
+                    if(!Utils.isConnectedToInternet(MessageActivity.this)){
+                        Toast.makeText(MessageActivity.this, "Check your Internet connection", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
                     getCurrentLocation();
                 }
             }
@@ -211,6 +227,7 @@ public class MessageActivity extends AppCompatActivity {
         if(locationEnabled()){
             //gps is on, proceed to send the message
             pd.setMessage("Sending Location...");
+            pd.setCancelable(false);
             pd.show();
 
             //setup location request
@@ -419,6 +436,7 @@ public class MessageActivity extends AppCompatActivity {
         });
     }
 
+    //method to send notification
     private void sendNotification(final String receiver, final String username, final String message) {
         firestore.collection("Tokens").document(receiver).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
@@ -434,7 +452,7 @@ public class MessageActivity extends AppCompatActivity {
 
                 Sender sender = new Sender(data, token.getToken());
 
-                //send the notification to cloud messaging,fcm json object request
+                //send the notification to cloud messaging, fcm json object request
                 try {
                     JSONObject senderJsonObj = new JSONObject(new Gson().toJson(sender));
                     JsonObjectRequest jsonObjectRequest = new JsonObjectRequest("https://fcm.googleapis.com/fcm/send",

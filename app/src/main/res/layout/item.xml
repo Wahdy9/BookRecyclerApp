@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
             android:layout_marginTop="8dp"
-            android:layout_marginEnd="4dp"
+            android:layout_marginEnd="5dp"
             android:ellipsize="end"
             android:fontFamily="sans-serif-condensed"
             android:maxLines="1"
@@ -64,6 +64,7 @@
             android:layout_width="16dp"
             android:layout_height="16dp"
             android:layout_marginBottom="4dp"
+            android:tint="#c0c0c0"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/commentCountLB"
             app:srcCompat="@drawable/ic_message" />
@@ -84,6 +85,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="5dp"
             android:layout_marginTop="32dp"
+            android:tint="#c0c0c0"
             app:layout_constraintStart_toEndOf="@+id/imgLB"
             app:layout_constraintTop_toBottomOf="@+id/titleLB"
             app:srcCompat="@drawable/ic_account" />
@@ -103,10 +105,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="33dp"
+            android:tint="#c0c0c0"
             app:layout_constraintEnd_toStartOf="@+id/categoryLB"
             app:layout_constraintTop_toBottomOf="@+id/titleLB"
-            app:srcCompat="@drawable/ic_book"
-            app:tint="#c0c0c0" />
+            app:srcCompat="@drawable/ic_book" />
 
         <TextView
             android:id="@+id/categoryLB"
@@ -123,11 +125,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="2dp"
+            android:tint="@android:color/holo_green_dark"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_more_vert"
-            app:tint="@android:color/black" />
+            app:srcCompat="@drawable/ic_edit" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

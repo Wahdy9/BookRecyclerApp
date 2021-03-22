@@ -5,18 +5,19 @@ import com.google.firebase.Timestamp;
 public class CommentModel {
 
 
-    private String user_id,commentId,text;
+    private String user_id,commentId,text, commentItemId;
     private Timestamp timestamp;
 
 
     public CommentModel() {
     }
 
-    public CommentModel(String user_id, String commentId, String text, Timestamp timestamp) {
+    public CommentModel(String user_id, String commentId, String text, Timestamp timestamp, String commentItemId) {
         this.user_id = user_id;
         this.commentId = commentId;
         this.text = text;
         this.timestamp = timestamp;
+        this.commentItemId = commentItemId;
     }
 
     public String getUser_id() {
@@ -49,5 +50,13 @@ public class CommentModel {
 
     public void setTimestamp(Timestamp timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getCommentItemId() {
+        return commentItemId;
+    }
+
+    public void setCommentItemId(String commentItemId) {
+        this.commentItemId = commentItemId;
     }
 }

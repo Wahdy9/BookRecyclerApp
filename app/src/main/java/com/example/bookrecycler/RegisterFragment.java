@@ -69,6 +69,12 @@ public class RegisterFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
+                //check Internet
+                if(!Utils.isConnectedToInternet(getContext())){
+                    Toast.makeText(getContext(), "Check your Internet connection", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 register();
 
             }
@@ -77,6 +83,7 @@ public class RegisterFragment extends Fragment {
         return view;
     }
 
+    //register method
     private void register(){
         //check if data is entered correctly
         if (!validateEmail() | !validateUsername() | !validatePassword() | !validatePhone()) {
@@ -201,12 +208,8 @@ public class RegisterFragment extends Fragment {
         } else if (confirmPass.isEmpty()) {
             password2ET.setError("Field can not be empty!");
             return false;
-            /*else if (!PASSWORD_PATTERN.matcher(password).matches()) {
-            passwordET.setError("Password too weak");
-            return false;
-            }*/
         } else if (!password.equals(confirmPass)) {
-            password2ET.setError("Passwords doesn't match");
+            password2ET.setError("Password doesn't match");
             return false;
         } else {
             passwordET.setError(null);

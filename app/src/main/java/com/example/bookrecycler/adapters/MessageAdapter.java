@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,16 +18,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bookrecycler.MessageActivity;
 import com.example.bookrecycler.R;
+import com.example.bookrecycler.Utils;
 import com.example.bookrecycler.models.MessageModel;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
-import java.util.TimeZone;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder>{
 
@@ -84,13 +82,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
         //format and set time
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-            sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
             long time = msg.getTimestamp().getTime();
+            CharSequence timePassed = Utils.getTimePassed(time);
+            holder.timeTV.setText(timePassed);
 
-            long now = System.currentTimeMillis();
-            CharSequence ago = DateUtils.getRelativeTimeSpanString(time, now, DateUtils.MINUTE_IN_MILLIS);
-            holder.timeTV.setText(ago);
         }catch(Exception e){
             Log.d("Message Adapter", "onBindViewHolder: " + e.getMessage());
         }

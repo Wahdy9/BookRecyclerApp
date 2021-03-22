@@ -152,6 +152,14 @@ public class AddItemActivity extends AppCompatActivity {
         addItemBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                //check Internet
+                if(!Utils.isConnectedToInternet(AddItemActivity.this)){
+                    Toast.makeText(AddItemActivity.this, "Check your Internet connection", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                //upload/update item
                 if(isEditMode){
                     uploadEditedItem();
                 }else{

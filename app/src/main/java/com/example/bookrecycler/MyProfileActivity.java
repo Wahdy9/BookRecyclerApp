@@ -7,15 +7,20 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -28,7 +33,10 @@ import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -55,7 +63,10 @@ public class MyProfileActivity extends AppCompatActivity {
     private Button saveBtn;
     private Switch phoneSwitch;
     private Switch emailSwitch;
-    private TextView avgRatingTV;
+    private TextView avgRatingTV, changePassTV;
+
+    private TextInputLayout passwordET, password2ET;
+    private Button changeBtn, cancelBtn;
 
     //Firebase
     private FirebaseAuth mAuth;
@@ -98,6 +109,7 @@ public class MyProfileActivity extends AppCompatActivity {
         emailSwitch = findViewById(R.id.profile_email_switch);
         pd = new ProgressDialog(MyProfileActivity.this);
         avgRatingTV =  findViewById(R.id.profile_avg_rating_tv);
+        changePassTV = findViewById(R.id.profile_change_pass);
 
         //initialize firebase
         mAuth = FirebaseAuth.getInstance();
@@ -191,10 +203,24 @@ public class MyProfileActivity extends AppCompatActivity {
             }
         });
 
+        //change password click
+        changePassTV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showPassChangeDialog();
+            }
+        });
+
         //upload updated data, when btn is clicked
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                //check Internet
+                if(!Utils.isConnectedToInternet(MyProfileActivity.this)){
+                    Toast.makeText(MyProfileActivity.this, "Check your Internet connection", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
                 //get data
                 String name = usernameET.getText().toString().trim();
@@ -283,6 +309,102 @@ public class MyProfileActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    //method to change password
+    private void showPassChangeDialog() {
+        //set up dialog layout
+        AlertDialog.Builder builder = new AlertDialog.Builder(MyProfileActivity.this);
+        View layoutDialog = LayoutInflater.from(MyProfileActivity.this).inflate(R.layout.change_password_layout, null);
+        builder.setView(layoutDialog);
+
+        //init views
+        passwordET = layoutDialog.findViewById(R.id.change_pass_et);
+        password2ET = layoutDialog.findViewById(R.id.change_pass_et2);
+        changeBtn = layoutDialog.findViewById(R.id.change_pass_btn);
+        cancelBtn = layoutDialog.findViewById(R.id.cancel_pass_btn);
+
+        //show dialog
+        final AlertDialog dialog = builder.create();
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.show();
+        dialog.setCancelable(false);
+        dialog.getWindow().setGravity(Gravity.CENTER);
+
+        //cancel btn clicked
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        //change btn clicked
+        changeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                //check Internet
+                if(!Utils.isConnectedToInternet(MyProfileActivity.this)){
+                    Toast.makeText(MyProfileActivity.this, "Check your Internet connection", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                //validate password
+                if(!validatePassword()){
+                    return;
+                }
+
+                //get password
+                final String pass = passwordET.getEditText().getText().toString();
+
+                //update password in firebase
+                final FirebaseUser user = mAuth.getCurrentUser();
+                user.updatePassword(pass).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+
+                        if (task.isSuccessful()) {
+                            //password updated
+                            dialog.dismiss();
+                            Toast.makeText(MyProfileActivity.this, "Password update successfully", Toast.LENGTH_SHORT).show();
+
+                        } else {
+                            //password fail to update, show error
+                            if(task.getException() instanceof FirebaseAuthRecentLoginRequiredException){
+                                //this exception requires recent login in order for change password to work
+                                Toast.makeText(MyProfileActivity.this, "You need to logout and login to use this feature", Toast.LENGTH_SHORT).show();
+                            }else {
+                                Toast.makeText(MyProfileActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                            Log.d("MyProfileActivity", "Error password not updated= " + task.getException().toString());
+                        }
+                    }
+                });
+
+            }
+        });
+
+    }
+
+    //method to validate password
+    boolean validatePassword() {
+        String password = passwordET.getEditText().getText().toString().trim();
+        String confirmPass = password2ET.getEditText().getText().toString().trim();
+
+        if (password.isEmpty()) {
+            passwordET.setError("Field can not be empty!");
+            return false;
+        }else if (confirmPass.isEmpty()) {
+            password2ET.setError("Field can not be empty!");
+            return false;
+        } else if (!password.equals(confirmPass)) {
+            password2ET.setError("Password doesn't match");
+            return false;
+        } else {
+            passwordET.setError(null);
+            return true;
+        }
     }
 
     //method to upload data to firestore
