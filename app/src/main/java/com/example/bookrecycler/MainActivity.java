@@ -9,6 +9,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -82,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
     //boolean used to refresh the MainActivity when there are changes that affects it in another activity
     public static boolean refreshMainActivity = false;
 
+    @SuppressLint("InflateParams")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -156,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
                         populateRV(); //to refresh after sign out
                         break;
                 }
-                //close drawer after clicking an item
+                //close drawer after clicking an item with an animation called gradvityCompat
                 drawerLayout.closeDrawer(GravityCompat.START);
                 return true;
             }
@@ -171,6 +173,7 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(new Intent(MainActivity.this, AddItemActivity.class));
                 }else{
                     startActivity(new Intent(MainActivity.this, LoginAndRegisterActivity.class));
+                    Toast.makeText(MainActivity.this, "You Must Login or Register to Upload an Item", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -187,12 +190,12 @@ public class MainActivity extends AppCompatActivity {
         searchET.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
+                //No need of it for now
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
+                //no need for it now
             }
 
             @Override
@@ -545,7 +548,8 @@ public class MainActivity extends AppCompatActivity {
             editor.putString("Current_USERID",user.getUid());
             editor.apply();
             //update token
-            updateToken(FirebaseInstanceId.getInstance().getToken());
+            updateToken(FirebaseInstanceId.getInstance().getToken());// take a look at the this method. its depracted.
+            //let's try to change it to new one
         }
     }
 

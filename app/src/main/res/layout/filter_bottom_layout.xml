@@ -91,10 +91,10 @@
         android:id="@+id/imageView23"
         android:layout_width="0dp"
         android:layout_height="46dp"
-        android:tint="@color/colorGrey2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_minus_sign" />
+        app:srcCompat="@drawable/ic_minus_sign"
+        app:tint="@color/colorGrey2" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

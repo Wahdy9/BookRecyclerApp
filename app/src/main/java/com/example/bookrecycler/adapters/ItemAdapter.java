@@ -32,6 +32,7 @@ import com.example.bookrecycler.models.ItemModel;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -107,7 +108,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
         firestore.collection("Items").document(itemModel.getItemId()).collection("Comments").addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                if (!queryDocumentSnapshots.isEmpty()) {//if no comments
+                if (!queryDocumentSnapshots.isEmpty()) {//if there is/are comments
                     int commentCount = queryDocumentSnapshots.size();
                     holder.commentCountTV.setText(commentCount + "");
                 } else {
@@ -124,8 +125,9 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
         holder.categoryTV.setText(itemModel.getCategory());
 
         //if item belong to current user, show more btn, so user can edit or delete item
-        if(mAuth.getCurrentUser() != null) {
-            if (mAuth.getCurrentUser().getUid().equals(itemModel.getUserId())) {
+        FirebaseUser user = mAuth.getCurrentUser();// to increase performace by not visiting the db moretimes
+        if(user != null) {
+            if (user.getUid().equals(itemModel.getUserId())) {
                 holder.moreIV.setVisibility(View.VISIBLE);
                 holder.moreIV.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -135,8 +137,9 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
                         PopupMenu popupMenu = new PopupMenu(mContext, holder.moreIV, Gravity.END);
 
                         //add delete and edit entries in the menu
-                        popupMenu.getMenu().add(Menu.NONE, 0,0,"Delete");
-                        popupMenu.getMenu().add(Menu.NONE, 1,0,"Edit");
+                        popupMenu.getMenu().add(Menu.NONE, 0,Menu.NONE,"Delete");
+                        popupMenu.getMenu().add(Menu.NONE, 1,Menu.NONE,"Edit");
+
 
                         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                             @Override
