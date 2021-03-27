@@ -51,6 +51,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -58,8 +59,6 @@ public class MainActivity extends AppCompatActivity {
 
     //views
     private SwipeRefreshLayout refreshLayout;
-    private FloatingActionButton Add_item_fab;
-    private ImageButton filterBtn;
     private EditText searchET;
     private ProgressDialog pd;
 
@@ -96,8 +95,8 @@ public class MainActivity extends AppCompatActivity {
 
         //init views
         refreshLayout = findViewById(R.id.main_refresh_layout);
-        Add_item_fab = findViewById(R.id.Add_item_fab);
-        filterBtn =  findViewById(R.id.filterBtn);
+        FloatingActionButton add_item_fab = findViewById(R.id.Add_item_fab);
+        ImageButton filterBtn = findViewById(R.id.filterBtn);
         searchET = findViewById(R.id.searchET);
 
         //initialize firebase
@@ -165,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //Open AddItemActivity when clicking floating add btn
-        Add_item_fab.setOnClickListener(new View.OnClickListener() {
+        add_item_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //check if user logged
@@ -253,13 +252,14 @@ public class MainActivity extends AppCompatActivity {
             final TextView headerNameTV = headerView.findViewById(R.id.nav_header_name_tv);
             final TextView headerEmailTV = headerView.findViewById(R.id.nav_header_email_tv);
             final CircleImageView headerIV = headerView.findViewById(R.id.nav_header_iv);
-            firestore.collection("Users").document(mAuth.getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            firestore.collection("Users").document(Objects.requireNonNull(mAuth.getUid())).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                 @Override
                 public void onSuccess(DocumentSnapshot documentSnapshot) {
                     //assign values to header views
                     headerNameTV.setText(documentSnapshot.getString("name"));
                     headerEmailTV.setText(documentSnapshot.getString("email"));
                     String profileImgUrl = documentSnapshot.getString("img_url");
+                    assert profileImgUrl != null;
                     if (!profileImgUrl.equals("default")) {
                         RequestOptions requestOptions = new RequestOptions().placeholder(R.drawable.user_profile);
                         Glide.with(MainActivity.this).setDefaultRequestOptions(requestOptions).load(profileImgUrl).into(headerIV);
@@ -475,7 +475,7 @@ public class MainActivity extends AppCompatActivity {
         //get the badge
         final TextView badge = (TextView)navigationView.getMenu().findItem(R.id.nav_log_chats).getActionView();
         //run query, set visibility of the badge if there is new msgs
-        firestore.collection("Chatlist").document(mAuth.getUid()).collection("Contacted").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        firestore.collection("Chatlist").document(Objects.requireNonNull(mAuth.getUid())).collection("Contacted").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 if(queryDocumentSnapshots!=null) {
