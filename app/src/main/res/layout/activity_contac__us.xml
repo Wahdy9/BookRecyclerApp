@@ -149,7 +149,7 @@
                 android:ellipsize="end"
                 android:fontFamily="sans-serif-condensed"
                 android:maxLines="1"
-                android:text="Khalid Wahedy"
+                android:text="Khaled Wahdy"
                 android:textColor="@android:color/black"
                 android:textSize="18sp"
                 app:layout_constraintStart_toEndOf="@+id/imgLB2"

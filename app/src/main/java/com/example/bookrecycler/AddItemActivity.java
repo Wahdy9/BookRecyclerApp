@@ -182,11 +182,12 @@ public class AddItemActivity extends AppCompatActivity {
         }
         return -1;
     }
+
     //return the index of a specific condition
     private int getConditionSpinnerPosition() {
         String[] conditions = getResources().getStringArray(R.array.spinner_condition_types);
         for (int i = 0; i < conditions.length;i++) {
-            if(conditions[i].equalsIgnoreCase(itemToEdit.getCategory())){
+            if(conditions[i].equalsIgnoreCase(itemToEdit.getCondition())){
                 return i;
             }
         }
