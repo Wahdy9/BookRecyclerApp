@@ -1,6 +1,6 @@
 package com.example.bookrecycler.notification;
 
-//Token is the id of the device in Firebase Cloud Messaging
+//Token is an auto id generated for each device in Firebase Cloud Messaging
 public class Token {
     String token;
 

@@ -78,7 +78,6 @@ public class MessageActivity extends AppCompatActivity {
     //views
     private CircleImageView profile_image;
     private TextView usernameTV;
-    private ImageButton sendBtn, gpsBtn;
     private EditText msgET;
     private ProgressDialog pd;
 
@@ -121,9 +120,9 @@ public class MessageActivity extends AppCompatActivity {
         //initialize views
         profile_image = findViewById(R.id.msg_profile_image);
         usernameTV = findViewById(R.id.msg_username);
-        sendBtn = findViewById(R.id.msg_btn_send);
+        ImageButton sendBtn = findViewById(R.id.msg_btn_send);
         msgET = findViewById(R.id.msg_text_send);
-        gpsBtn = findViewById(R.id.gps_btn_send);
+        ImageButton gpsBtn = findViewById(R.id.gps_btn_send);
         pd = new ProgressDialog(MessageActivity.this);
 
         //initialize firebase
@@ -142,6 +141,7 @@ public class MessageActivity extends AppCompatActivity {
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if (documentSnapshot != null) {
                     UserModel user = documentSnapshot.toObject(UserModel.class);
+                    assert user != null;
                     usernameTV.setText(user.getName());
                     if (user.getImg_url().equals("default")) {
                         profile_image.setImageResource(R.drawable.user_profile);
@@ -460,6 +460,7 @@ public class MessageActivity extends AppCompatActivity {
                 Data data = new Data(""+mAuth.getUid(), ""+username +": "+message, "New Message",
                         ""+receiver,"ChatNotification" ,R.drawable.book_recycler_logo);
 
+                assert token != null;
                 Sender sender = new Sender(data, token.getToken());
 
                 //send the notification to cloud messaging, fcm json object request

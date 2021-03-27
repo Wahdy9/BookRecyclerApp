@@ -39,6 +39,7 @@ import com.example.bookrecycler.adapters.ItemAdapter;
 import com.example.bookrecycler.models.ItemModel;
 import com.example.bookrecycler.notification.Token;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
@@ -49,6 +50,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.installations.FirebaseInstallations;
+import com.google.firebase.installations.InstallationTokenResult;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -532,6 +535,7 @@ public class MainActivity extends AppCompatActivity {
             editor.apply();
             //update token
             updateToken(FirebaseInstanceId.getInstance().getToken());
+           // updateToken(FirebaseInstallations.getInstance().getToken(true));
         }
     }
 
@@ -550,12 +554,17 @@ public class MainActivity extends AppCompatActivity {
             //update token
             updateToken(FirebaseInstanceId.getInstance().getToken());// take a look at the this method. its depracted.
             //let's try to change it to new one
+          //  updateToken(FirebaseInstallations.getInstance().getToken(false));
         }
     }
 
+//    private void updateToken(Task<InstallationTokenResult> token) {
+//        firestore.collection("Token1").document(Objects.requireNonNull(mAuth.getUid())).set(token);
+//    }
+
     public void updateToken(String token){
         Token mToken = new Token(token);
-        firestore.collection("Tokens").document(mAuth.getUid()).set(mToken);
+        firestore.collection("Tokens").document(Objects.requireNonNull(mAuth.getUid())).set(mToken);
     }
 
     //Option menu

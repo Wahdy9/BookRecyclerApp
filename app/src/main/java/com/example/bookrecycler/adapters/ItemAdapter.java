@@ -102,6 +102,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder>{
         firestore.collection("Items").document(itemModel.getItemId()).collection("Comments").addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                assert queryDocumentSnapshots != null;
                 if (!queryDocumentSnapshots.isEmpty()) {//if there is/are comments
                     int commentCount = queryDocumentSnapshots.size();
                     holder.commentCountTV.setText(commentCount + "");
