@@ -170,7 +170,7 @@
                 android:layout_marginTop="8dp"
                 android:background="@drawable/shape_rectangle"
                 android:ems="10"
-                android:inputType="number"
+                android:inputType="text"
                 android:padding="8dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView14" />

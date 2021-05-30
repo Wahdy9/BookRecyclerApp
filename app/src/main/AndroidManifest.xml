@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.bookrecycler">
+    package="com.book.bookrecycler">
 
     <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -17,31 +17,31 @@
         android:roundIcon="@drawable/book_recycler_logo"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Contac_Us"
+        <activity android:name="com.book.bookrecycler.Contac_Us"
             android:screenOrientation="portrait"/><!--So activity won't rotate -->
-        <activity android:name=".About_Page"
+        <activity android:name="com.book.bookrecycler.About_Page"
             android:screenOrientation="portrait"/>
-        <activity android:name=".MyItemsActivity"
+        <activity android:name="com.book.bookrecycler.MyItemsActivity"
             android:screenOrientation="portrait"/>
-        <activity android:name=".FavoriteActivity"
+        <activity android:name="com.book.bookrecycler.FavoriteActivity"
             android:screenOrientation="portrait"/>
-        <activity android:name=".ChatListActivity"
+        <activity android:name="com.book.bookrecycler.ChatListActivity"
             android:screenOrientation="portrait"/>
-        <activity android:name=".MessageActivity"
+        <activity android:name="com.book.bookrecycler.MessageActivity"
             android:screenOrientation="portrait"/>
-        <activity android:name=".UsersProfileActivity"
+        <activity android:name="com.book.bookrecycler.UsersProfileActivity"
             android:screenOrientation="portrait"/>
-        <activity android:name=".MyProfileActivity"
+        <activity android:name="com.book.bookrecycler.MyProfileActivity"
             android:screenOrientation="portrait"/>
-        <activity android:name=".ItemDetailsActivity"
+        <activity android:name="com.book.bookrecycler.ItemDetailsActivity"
             android:screenOrientation="portrait"/>
-        <activity android:name=".AddItemActivity"
+        <activity android:name="com.book.bookrecycler.AddItemActivity"
             android:screenOrientation="portrait"/>
-        <activity android:name=".LoginAndRegisterActivity"
+        <activity android:name="com.book.bookrecycler.LoginAndRegisterActivity"
             android:screenOrientation="portrait"/>
-        <activity android:name=".MainActivity"
+        <activity android:name="com.book.bookrecycler.MainActivity"
             android:screenOrientation="portrait"/>
-        <activity android:name=".SplashActivity"
+        <activity android:name="com.book.bookrecycler.SplashActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -56,7 +56,7 @@
 
         <!-- Notification Service -->
         <service
-            android:name=".notification.FirebaseMessaging"
+            android:name="com.book.bookrecycler.notification.FirebaseMessaging"
             android:enabled="true"
             android:exported="true">
             <intent-filter>

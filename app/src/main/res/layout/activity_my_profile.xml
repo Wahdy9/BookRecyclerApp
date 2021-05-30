@@ -86,10 +86,10 @@
                         android:layout_height="52dp"
                         android:layout_marginStart="8dp"
                         android:layout_marginTop="8dp"
-                        android:tint="#cbcf02"
                         app:layout_constraintStart_toEndOf="@+id/profile_img"
                         app:layout_constraintTop_toBottomOf="@+id/profile_username_et"
-                        app:srcCompat="@drawable/ic_star" />
+                        app:srcCompat="@drawable/ic_star"
+                        app:tint="#cbcf02" />
 
                     <TextView
                         android:id="@+id/profile_avg_rating_tv"
@@ -145,7 +145,7 @@
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
                     android:background="@drawable/shape_rectangle"
-                    android:ems="10"
+                    android:ems="11"
                     android:inputType="phone"
                     android:padding="8dp"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -171,13 +171,24 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:layout_marginTop="16dp"
-                    android:text="Major"
+                    android:text="Country "
                     android:textColor="@android:color/black"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     app:layout_constraintStart_toEndOf="@+id/imageView22"
                     app:layout_constraintTop_toBottomOf="@+id/profile_email_et" />
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toEndOf="@id/textView4"
+                    app:layout_constraintTop_toBottomOf="@id/profile_email_et"
+                    android:text="Province/state"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginStart="90dp"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"/>
                 <EditText
                     android:id="@+id/profile_email_et"
                     android:layout_width="0dp"
@@ -195,7 +206,7 @@
                     app:layout_constraintTop_toBottomOf="@+id/textView24" />
 
             <EditText
-                android:id="@+id/profile_major_et"
+                android:id="@+id/profile_country_et"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -207,10 +218,23 @@
                 android:inputType="textPersonName"
                 android:padding="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/profile_province_et"
                 app:layout_constraintTop_toBottomOf="@+id/textView4" />
+
+            <EditText
+                android:id="@+id/profile_province_et"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toEndOf="@id/profile_country_et"
+                android:background="@drawable/shape_rectangle"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textView4"
+                android:ems="10"
+                android:padding="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"/>
 
                 <ImageView
                     android:id="@+id/imageView18"
@@ -218,10 +242,10 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
-                    android:tint="@android:color/black"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/ic_phone_grey" />
+                    app:srcCompat="@drawable/ic_phone_grey"
+                    app:tint="@android:color/black" />
 
                 <ImageView
                     android:id="@+id/imageView21"
@@ -229,10 +253,10 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="16dp"
-                    android:tint="@android:color/black"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/profile_phone_et"
-                    app:srcCompat="@drawable/ic_email_grey" />
+                    app:srcCompat="@drawable/ic_email_grey"
+                    app:tint="@android:color/black" />
 
                 <ImageView
                     android:id="@+id/imageView22"
@@ -242,7 +266,8 @@
                     android:layout_marginTop="16dp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/profile_email_et"
-                    app:srcCompat="@drawable/ic_school" />
+                    app:srcCompat="@drawable/ic_gps"
+                    app:tint="@android:color/black"/>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

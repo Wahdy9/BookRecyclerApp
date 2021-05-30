@@ -51,7 +51,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/userProfile_major_tv"
+            android:id="@+id/userProfile_province_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -68,13 +68,13 @@
             android:id="@+id/userProfile_chat_ll"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="48dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginStart="0dp"
+            android:layout_marginBottom="77dp"
             android:gravity="center"
             android:orientation="vertical"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/userProfile_img"
-            app:layout_constraintTop_toBottomOf="@+id/userProfile_major_tv">
+            app:layout_constraintEnd_toStartOf="@id/userProfile_email_ll"
+            app:layout_constraintStart_toEndOf="@id/userProfile_phone_ll"
+            app:layout_constraintBottom_toBottomOf="parent">
 
             <ImageView
                 android:id="@+id/imageView3"
@@ -94,19 +94,21 @@
             android:id="@+id/userProfile_phone_ll"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="45dp"
+            android:layout_marginEnd="0dp"
             android:layout_marginBottom="77dp"
+            android:layout_marginStart="77dp"
             android:gravity="center"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/userProfile_chat_ll">
+            app:layout_constraintEnd_toStartOf="@+id/userProfile_chat_ll"
+            app:layout_constraintStart_toStartOf="parent">
 
             <ImageView
                 android:id="@+id/imageView4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:tint="#585858"
-                app:srcCompat="@drawable/ic_phone_grey" />
+                app:srcCompat="@drawable/ic_phone_grey"
+                app:tint="#585858" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -115,24 +117,25 @@
                 android:textColor="@android:color/black" />
         </LinearLayout>
 
-        <!-- for phone -->
+        <!-- for email -->
         <LinearLayout
             android:id="@+id/userProfile_email_ll"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="45dp"
+            android:layout_marginStart="0dp"
             android:layout_marginBottom="77dp"
             android:gravity="center"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/userProfile_chat_ll">
 
             <ImageView
                 android:id="@+id/imageView5"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:tint="#585858"
-                app:srcCompat="@drawable/ic_email_grey" />
+                app:srcCompat="@drawable/ic_email_grey"
+                app:tint="#585858" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -145,8 +148,10 @@
             android:id="@+id/userProfile_rating_bar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginStart="80dp"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
         <ImageView
@@ -155,10 +160,10 @@
             android:layout_height="52dp"
             android:layout_marginStart="40dp"
             android:layout_marginTop="16dp"
-            android:tint="#cbcf02"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/userProfile_img"
-            app:srcCompat="@drawable/ic_star" />
+            app:srcCompat="@drawable/ic_star"
+            app:tint="#cbcf02" />
 
         <TextView
             android:id="@+id/userProfile_avg_rating_tv"
@@ -196,10 +201,10 @@
             android:layout_height="48dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:tint="#585858"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_book" />
+            app:srcCompat="@drawable/ic_book"
+            app:tint="#585858" />
 
         <TextView
             android:id="@+id/userProfile_count_tv"
